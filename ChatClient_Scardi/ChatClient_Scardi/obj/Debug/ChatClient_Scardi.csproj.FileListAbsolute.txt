@@ -1,0 +1,11 @@
+C:\Users\Tommaso\Documents\Visual Studio 2019\Projects\ChatClient_Scardi\ChatClient_Scardi\bin\Debug\ChatClient_Scardi.exe.config
+C:\Users\Tommaso\Documents\Visual Studio 2019\Projects\ChatClient_Scardi\ChatClient_Scardi\bin\Debug\ChatClient_Scardi.exe
+C:\Users\Tommaso\Documents\Visual Studio 2019\Projects\ChatClient_Scardi\ChatClient_Scardi\bin\Debug\ChatClient_Scardi.pdb
+C:\Users\Tommaso\Documents\Visual Studio 2019\Projects\ChatClient_Scardi\ChatClient_Scardi\obj\Debug\ChatClient_Scardi.csproj.AssemblyReference.cache
+C:\Users\Tommaso\Documents\Visual Studio 2019\Projects\ChatClient_Scardi\ChatClient_Scardi\obj\Debug\ChatClient_Scardi.ChatClient.resources
+C:\Users\Tommaso\Documents\Visual Studio 2019\Projects\ChatClient_Scardi\ChatClient_Scardi\obj\Debug\ChatClient_Scardi.Properties.Resources.resources
+C:\Users\Tommaso\Documents\Visual Studio 2019\Projects\ChatClient_Scardi\ChatClient_Scardi\obj\Debug\ChatClient_Scardi.csproj.GenerateResource.cache
+C:\Users\Tommaso\Documents\Visual Studio 2019\Projects\ChatClient_Scardi\ChatClient_Scardi\obj\Debug\ChatClient_Scardi.csproj.CoreCompileInputs.cache
+C:\Users\Tommaso\Documents\Visual Studio 2019\Projects\ChatClient_Scardi\ChatClient_Scardi\obj\Debug\ChatClient_Scardi.exe
+C:\Users\Tommaso\Documents\Visual Studio 2019\Projects\ChatClient_Scardi\ChatClient_Scardi\obj\Debug\ChatClient_Scardi.pdb
+C:\Users\Tommaso\Documents\Visual Studio 2019\Projects\ChatClient_Scardi\ChatClient_Scardi\obj\Debug\ManagementWindow.MWindow.resources

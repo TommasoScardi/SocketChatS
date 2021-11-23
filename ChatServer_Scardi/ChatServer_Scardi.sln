@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31702.278
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatServer_Scardi", "ChatServer_Scardi\ChatServer_Scardi.csproj", "{2E3EF345-A946-4595-A89A-37A2EA8C1F0C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibChatServer", "LibChatServer\LibChatServer.csproj", "{77BE16BE-1AF4-4AAE-B53D-1326399E1813}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2E3EF345-A946-4595-A89A-37A2EA8C1F0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E3EF345-A946-4595-A89A-37A2EA8C1F0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E3EF345-A946-4595-A89A-37A2EA8C1F0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E3EF345-A946-4595-A89A-37A2EA8C1F0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77BE16BE-1AF4-4AAE-B53D-1326399E1813}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77BE16BE-1AF4-4AAE-B53D-1326399E1813}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77BE16BE-1AF4-4AAE-B53D-1326399E1813}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77BE16BE-1AF4-4AAE-B53D-1326399E1813}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {69AB5AAB-F8EE-4CF9-8C73-DFD01AFC7C9D}
+	EndGlobalSection
+EndGlobal

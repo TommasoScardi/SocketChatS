@@ -1,0 +1,605 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using ManagementWindow;
+using LibChatClient;
+using LibChatClient.Protocol;
+using LibChatClient.Connections;
+using LibChatClient.User;
+
+namespace ChatClient_Scardi
+{
+    public partial class ChatClient : Form
+    {
+        IPAddress ServerIP, ClientIP;
+        bool ServerConnection = false;
+
+        int UserID = -1;
+        string UserName = null;
+        Contact[] UserContacts;
+        int indexContactSelected = -1;
+
+        public ChatClient()
+        {
+            InitializeComponent();
+            //ManagementWindow.ManagementWindow m = new ManagementWindow.ManagementWindow(ManagementWindow.Type.UserRegistration);
+            //m.ShowDialog();
+        }
+
+        private void InizializeInterface()
+        {
+            accediToolStripMenuItem.Enabled = true;
+            esciToolStripMenuItem.Enabled = false;
+            registratiToolStripMenuItem.Enabled = true;
+
+            DeactivateContactsControls();
+
+            panelViewMsg.Controls.Clear();
+        }
+
+        private void DeactivateContactsControls()
+        {
+
+            btnAddContact.Enabled = false;
+
+            contattiToolStripMenuItem.Visible = false;
+            contattiToolStripMenuItem.Enabled = false;
+            aggiungiContattoToolStripMenuItem.Enabled = false;
+            aggiornaContattiToolStripMenuItem.Enabled = false;
+
+        }
+        
+        private void ActivateContactsControls()
+        {
+
+            btnAddContact.Enabled = true;
+
+            contattiToolStripMenuItem.Visible = true;
+            contattiToolStripMenuItem.Enabled = true;
+            aggiungiContattoToolStripMenuItem.Enabled = true;
+            aggiornaContattiToolStripMenuItem.Enabled = true;
+
+        }
+
+        private void FillContactsList()
+        {
+            try
+            {
+                string[] datas = { UserID.ToString() };
+                string strContacts = ReqContacts.Assemble(int.Parse(datas[ReqContacts.UserID]));
+                string strServerRes = Connection.SendReceiveFromServer(ServerIP, strContacts);
+                strServerRes = Protocols.RemoveTerminator(strServerRes);
+
+                if (!Protocols.VerifyServerError(strServerRes))
+                {
+                    UserContacts = XmlParser.ParseContacts(strServerRes);
+                    lstContacts.Items.Clear();
+                    foreach (Contact contact in UserContacts)
+                    {
+                        lstContacts.Items.Add(contact.UserName);
+                    }
+                }
+                else
+                {
+                    ErrorsType error;
+                    if (ErrorType.TryParse(strServerRes, out error))
+                    {
+                        if (error == ErrorsType.ReqContactsInexistent)
+                            MessageBox.Show("Hey, La tua lista contatti sembra essere vuota, Usa il pulsante Aggiungi Nuovo Contatto per riempirla", "Nessun Contatto Presente", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        else
+                            MessageBox.Show(error.ToString(), "Errore Ottenimento Contatti", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    else
+                        MessageBox.Show("Errore Sconosciuto sul server durante l'ottenimento dei contatti dell utente", "Errore Sconosciuto", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Errore Ottenimento Contatti", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void EmptyContactsList()
+        {
+            lstContacts.Items.Clear();
+            indexContactSelected = -1;
+            panelViewMsg.Controls.Clear();
+            boxChat.Visible = false;
+        }
+
+        private void ChatClient_Load(object sender, EventArgs e)
+        {
+            try
+            {
+                while (!ServerConnection)
+                {
+                    MWindow m = new MWindow(ManagementWindow.Type.Connection);
+                    m.ShowDialog();
+                    ServerIP = IPAddress.Parse(m.GetResult());
+
+                    if (Protocols.RemoveTerminator(Connection.SendReceiveFromServer(ServerIP, $"{TestConn.ProtocolString}{ServerIP}{EOF.ProtocolString}")) == ServerIP.ToString())
+                    {
+                        ServerConnection = true;
+                        nuovaConnessioneToolStripMenuItem.Enabled = false;
+                        connettiToolStripMenuItem.Enabled = false;
+                        disconnettiToolStripMenuItem.Enabled = true;
+
+                        boxChat.Visible = false;
+
+                        MessageBox.Show("Verifica Connessione al server tramite protocollo di test connessione effettuato con successo, risposta ottenuta", "Verifica IP Server Avvenuta", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                        MessageBox.Show("Verifica Connessione al server tramite protocollo di test connessione fallito, risposta non ottenuta", "Errore Verifica IP Server", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Test Connessione al server fallito, Impossibile Raggiungere il Server con l'IP Fornito", "Errore Connessione", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Application.Exit();
+            }
+
+            ClientIP = Connection.GetIPAddress();
+            InizializeInterface();
+        }
+
+        private void ChatClient_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (ServerConnection)
+                disconnettiToolStripMenuItem_Click(sender, e);
+        }
+
+        private void nuovaConnessioneToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                MWindow m = new MWindow(ManagementWindow.Type.Connection);
+                m.ShowDialog();
+                ServerIP = IPAddress.Parse(m.GetResult());
+
+                if (Protocols.RemoveTerminator(Connection.SendReceiveFromServer(ServerIP, $"{TestConn.ProtocolString}{ServerIP}{EOF.ProtocolString}")) == ServerIP.ToString())
+                {
+                    ServerConnection = true;
+                    nuovaConnessioneToolStripMenuItem.Enabled = false;
+                    connettiToolStripMenuItem.Enabled = false;
+                    disconnettiToolStripMenuItem.Enabled = true;
+
+                    MessageBox.Show("Verifica Connessione al server tramite protocollo di test connessione effettuato con successo, risposta ottenuta", "Verifica IP Server Avvenuta", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                    MessageBox.Show("Verifica Connessione al server tramite protocollo di test connessione fallito, risposta non ottenuta", "Errore Verifica IP Server", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Test Connessione al server fallito, Impossibile Raggiungere il Server con l'IP Fornito", "Errore Riconnessione", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void connettiToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Ping testServerIP = new Ping();
+                PingReply testStatus = testServerIP.Send(ServerIP);
+                if (testStatus.Status == IPStatus.Success)
+                {
+                    if (Protocols.RemoveTerminator(Connection.SendReceiveFromServer(ServerIP, $"{TestConn.ProtocolString}{ServerIP}{EOF.ProtocolString}")) == ServerIP.ToString())
+                    {
+                        ServerConnection = true;
+                        nuovaConnessioneToolStripMenuItem.Enabled = false;
+                        connettiToolStripMenuItem.Enabled = false;
+                        disconnettiToolStripMenuItem.Enabled = true;
+
+                        MessageBox.Show("Riconnessione al server avvenuta con Successo", "Riconnessione Avvenuta", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                        MessageBox.Show("Test Connessione al server fallito, Impossibile Raggiungere il Server", "Errore Riconnessione", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else if (testStatus.Status == IPStatus.TimedOut)
+                {
+                    testStatus = testServerIP.Send(ServerIP);
+                    if (testStatus.Status == IPStatus.Success)
+                    {
+                        if (Protocols.RemoveTerminator(Connection.SendReceiveFromServer(ServerIP, $"{TestConn.ProtocolString}{ServerIP}{EOF.ProtocolString}")) == ServerIP.ToString())
+                        {
+                            ServerConnection = true;
+                            nuovaConnessioneToolStripMenuItem.Enabled = false;
+                            connettiToolStripMenuItem.Enabled = false;
+                            disconnettiToolStripMenuItem.Enabled = true;
+
+                            MessageBox.Show("Riconnessione al server avvenuta con Successo", "Riconnessione Avvenuta", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        else
+                            MessageBox.Show("Test Connessione al server fallito, Impossibile Raggiungere il Server", "Errore Riconnessione", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Errore Riconnessione al server, provare con la funzione: Nuova Connessione...", "Errore Riconnessione", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                else
+                {
+                    ServerConnection = false;
+                    MessageBox.Show("Errore Riconnessione al server, provare con la funzione: Nuova Connessione...", "Errore Riconnessione", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    nuovaConnessioneToolStripMenuItem.Enabled = true;
+                    connettiToolStripMenuItem.Enabled = false;
+                    disconnettiToolStripMenuItem.Enabled = false;
+                }
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Test Connessione al server fallito, Impossibile Raggiungere il Server con l'IP Fornito", "Errore Riconnessione", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void disconnettiToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (ServerConnection)
+            {
+                if (UserID > 0)
+                    esciToolStripMenuItem_Click(sender, e);
+                ServerConnection = false;
+                DeactivateContactsControls();
+
+                MessageBox.Show("Disconnessione dal server avvenuta con successo, ogni utente loggato è stato disconnesso", "Disconnessione Avvenuta", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                MessageBox.Show("Impossibile Disconnettere, nessuna connessione attiva !", "Errore Disconnessione", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void accediToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ManagementWindow.MWindow m = new ManagementWindow.MWindow(ManagementWindow.Type.UserLogIn);
+            m.ShowDialog();
+            if (m.GetResult() != null)
+            {
+                try
+                {
+                    string res = m.GetResult();
+                    res += ClientIP.ToString();
+                    string[] datas = res.Split(new char[] { Protocols.DELIM }, Auth.ProtocolDataLenght, StringSplitOptions.RemoveEmptyEntries);
+                    string strAuth = Auth.Assemble(datas[Auth.UserName], datas[Auth.Password], IPAddress.Parse(datas[Auth.IpUtente]));
+                    string strServerRes = Connection.SendReceiveFromServer(ServerIP, strAuth);
+                    strServerRes = Protocols.RemoveTerminator(strServerRes);
+
+                    int tempUserID;
+                    if (int.TryParse(strServerRes, out tempUserID))
+                    {
+                        if (tempUserID > 0)
+                        {
+                            UserID = tempUserID;
+                            UserName = datas[Auth.UserName];
+
+                            accediToolStripMenuItem.Enabled = false;
+                            esciToolStripMenuItem.Enabled = true;
+                            registratiToolStripMenuItem.Enabled = false;
+
+                            ActivateContactsControls();
+
+                            this.Text = $"Chat Client Scardi -> {UserName}";
+
+                            MessageBox.Show($"Accesso effettuato con successo\r\nBenvenuto {UserName}", "Accesso Effettuato con Successo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            FillContactsList();
+
+                        }
+                        else
+                            MessageBox.Show("Errore nell'Accesso, Impossibile ottenere l'ID dell utente", "Errore Accesso", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                    }
+                    else
+                    {
+                        ErrorsType error;
+                        if (ErrorType.TryParse(strServerRes, out error))
+                            MessageBox.Show(error.ToString(), "Errore Accesso", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        else
+                            MessageBox.Show("Nel server si è verificato un errore sconosciuto.", "Errore Sconosciuto", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Errore Accesso", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            else
+                MessageBox.Show("Errore nell'Accesso, Campi non Riempiti o Finestra chiusa", "Errore Accesso", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        private void esciToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string[] datas = { $"{UserID}" };
+                string strDeAuth = DeAuth.Assemble(int.Parse(datas[DeAuth.UserID]));
+                string strServerRes = Connection.SendReceiveFromServer(ServerIP, strDeAuth);
+                strServerRes = Protocols.RemoveTerminator(strServerRes);
+
+                if (Protocols.GetStatus(strServerRes))
+                {
+                    if (UserID > 0)
+                    {
+                        string tempUName = UserName;
+                        UserID = -1;
+                        UserName = null;
+
+                        accediToolStripMenuItem.Enabled = true;
+                        esciToolStripMenuItem.Enabled = false;
+                        registratiToolStripMenuItem.Enabled = true;
+
+                        DeactivateContactsControls();
+
+                        this.Text = "Chat Client Scardi";
+                        EmptyContactsList();
+
+                        MessageBox.Show($"Disconnessione effettuata con successo\r\nArrivederci {tempUName}", "Disconnessione effettuata con successo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    }
+                    else
+                        MessageBox.Show("Utente Già Disconnesso, Nessun Utente Collegato", "Errore Disconnessione", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                }
+                else
+                {
+                    ErrorsType error;
+                    if (ErrorType.TryParse(strServerRes, out error))
+                        MessageBox.Show(error.ToString(), "Errore Disconnessione", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    else
+                        MessageBox.Show("Nel server si è verificato un errore sconosciuto.", "Errore Sconosciuto", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Errore Accesso", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void registratiToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MWindow m = new MWindow(ManagementWindow.Type.UserRegistration);
+            m.ShowDialog();
+            if (m.GetResult() != null)
+            {
+                try
+                {
+                    string res = m.GetResult();
+                    res += ClientIP.ToString();
+                    string[] datas = res.Split(new char[] { Protocols.DELIM }, NewUserReg.ProtocolDataLenght, StringSplitOptions.RemoveEmptyEntries);
+                    string strNewReg = NewUserReg.Assemble(datas[NewUserReg.UserName], datas[NewUserReg.Password], IPAddress.Parse(datas[NewUserReg.IpUtente]));
+                    string strServerRes = Connection.SendReceiveFromServer(ServerIP, strNewReg);
+                    strServerRes = Protocols.RemoveTerminator(strServerRes);
+
+                    if (Protocols.GetStatus(strServerRes))
+                    {
+                        MessageBox.Show("Registrazione effettuata con successo, ora è possibile Accedere con le credenziali appena create", "Registrazione Effettuata con Successo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        ErrorsType error;
+                        if (ErrorType.TryParse(strServerRes, out error))
+                            MessageBox.Show(error.ToString(), "Errore Registrazione Nuovo Utente", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        else
+                            MessageBox.Show("Nel server si è verificato un errore sconosciuto.", "Errore Sconosciuto", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Errore Registrazione", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            else
+                MessageBox.Show("Errore nella Registrazione, Campi non Riempiti o Finestra chiusa", "Errore Registrazione", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        private void aggiornaContattiToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FillContactsList();
+        }
+
+        private void aggiungiContattoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            btnAddContact_Click(sender, e);
+        }
+
+        private void btnAddContact_Click(object sender, EventArgs e)
+        {
+            ManagementWindow.MWindow m = new ManagementWindow.MWindow(ManagementWindow.Type.NewContact);
+            m.ShowDialog();
+            if (m.GetResult() != null)
+            {
+                if (UserID > 0)
+                {
+                    string res = UserID.ToString() + m.GetResult();
+                    string[] datas = res.Split(new char[] { Protocols.DELIM }, NewContact.ProtocolDataLenght, StringSplitOptions.RemoveEmptyEntries);
+                    string strNewContact = NewContact.Assemble(int.Parse(datas[NewContact.UserID]), datas[NewContact.UserContactName]);
+                    string strServerRes = Connection.SendReceiveFromServer(ServerIP, strNewContact);
+                    strServerRes = Protocols.RemoveTerminator(strServerRes);
+
+                    if (Protocols.GetStatus(strServerRes))
+                    {
+                        MessageBox.Show("Nuovo Contatto aggiunto con successo alla lista contatti personale", "Contatto Aggiunto con Successo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        FillContactsList();
+                    }
+                    else
+                    {
+                        ErrorsType error;
+                        if (ErrorType.TryParse(strServerRes, out error))
+                            MessageBox.Show(error.ToString(), "Errore Aggiunta Nuovo Contatto", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        else
+                            MessageBox.Show("Nel server si è verificato un errore sconosciuto.", "Errore Sconosciuto", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                else
+                {
+                    esciToolStripMenuItem_Click(sender, e);
+                    MessageBox.Show("ERRORE: l'ID associato all utente è invalido.\r\nQuesto potrebbe essere perche si è effettuato il logout o il server potrebbe aver riscontrato un errore.\r\nPer Sicurezza dei propri dati è stato effettuato il logout forzato.", "Errore ID Utente", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            /*
+             * Invio al server il nome del nuovo contatto e mi aspetto lo status della azione
+             * Confermo o meno tutto quanto con un messagebox per l'utente
+             */
+        }
+
+        private void lstContacts_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            const int POSXL = 10, POSXR = 560, STARTPOSY = 10, MSGMAXLENGTH = 70, DELTAMSGMAXL = 5, LBLPADDING = 3, DELTAXRMOVER = 50;
+            try
+            {
+                indexContactSelected = -1;
+                int indexContact = lstContacts.SelectedIndex;
+                string[] datas = { UserID.ToString() , UserContacts[indexContact].ID.ToString() };
+                string strContacts = LoadContact.Assemble(int.Parse(datas[LoadContact.UserID]), int.Parse(datas[LoadContact.ContactID]));
+                string strServerRes = Connection.SendReceiveFromServer(ServerIP, strContacts);
+                strServerRes = Protocols.RemoveTerminator(strServerRes);
+
+                boxChat.Visible = false;
+                if (!Protocols.VerifyServerError(strServerRes))
+                {
+                    UserContacts[indexContact].Messages = XmlParser.ParseMessages(strServerRes);
+
+                    boxChat.Text = $"Chat con: {UserContacts[indexContact].UserName}";
+                    panelViewMsg.Controls.Clear();
+
+                    List<Label> messages = new List<Label>();
+                    int posXR = 0, posY = STARTPOSY;
+                    int strRow = 0, adderHeigth = 30;
+                    string msgText = String.Empty;
+
+                    foreach (LibChatClient.User.Message message in UserContacts[indexContact].Messages)
+                    {
+                        msgText = String.Empty;
+                        if (message.Text.Length > MSGMAXLENGTH + DELTAMSGMAXL)
+                        {
+                            int newLineToInsert = message.Text.Length / (MSGMAXLENGTH + DELTAMSGMAXL);
+                            for (strRow = 0; strRow < newLineToInsert; strRow++)
+                            {
+                                msgText += message.Text.Substring((MSGMAXLENGTH * strRow), (MSGMAXLENGTH * (strRow + 1)) - (MSGMAXLENGTH * strRow)) + "\r\n";
+                            }
+                            msgText += message.Text.Substring(MSGMAXLENGTH * strRow);
+                        }
+                        else
+                        {
+                            msgText = message.Text;
+                        }
+
+                        Label tempLblMessage = new Label();
+                        tempLblMessage.Font = new Font(new FontFamily("Consolas"), 8.50f);
+
+                        tempLblMessage.Text = msgText;
+                        tempLblMessage.AutoSize = true;
+                        tempLblMessage.Padding = new Padding(LBLPADDING);
+                        tempLblMessage.BorderStyle = BorderStyle.FixedSingle;
+
+                        using (Graphics g = CreateGraphics())
+                        {
+                            SizeF size = g.MeasureString(tempLblMessage.Text, tempLblMessage.Font);
+                            posXR = (int)Math.Ceiling(size.Width);
+                        }
+                        tempLblMessage.Location = new Point((message.ContactReceiverID == UserID ? POSXL : panelViewMsg.Size.Width - (posXR + DELTAXRMOVER)), posY);
+                        tempLblMessage.Anchor = message.ContactReceiverID == UserID ? AnchorStyles.Top | AnchorStyles.Left : AnchorStyles.Top | AnchorStyles.Right;
+
+                        posY += (adderHeigth * (strRow > 0 ? strRow : 1));
+                        messages.Add(tempLblMessage);
+                    }
+
+                    panelViewMsg.Controls.AddRange(messages.ToArray());
+                    boxChat.Visible = true;
+                    indexContactSelected = indexContact;
+                }
+                else
+                {
+                    ErrorsType error;
+                    if (ErrorType.TryParse(strServerRes, out error))
+                    {
+                        if (error == ErrorsType.LoadContactMessageEmpty)
+                        {
+                            boxChat.Text = $"Chat con: {UserContacts[indexContact].UserName}";
+
+                            panelViewMsg.Controls.Clear();
+
+                            Label tempLblMessage = new Label();
+                            tempLblMessage.Text = "Nessun messaggio presente in questa chat.\r\nPer iniziare la conversazione scrivi nella casella qua sotto e invia il messaggio";
+                            tempLblMessage.TextAlign = ContentAlignment.MiddleCenter;
+                            tempLblMessage.AutoSize = true;
+                            tempLblMessage.Padding = new Padding(LBLPADDING);
+                            tempLblMessage.BorderStyle = BorderStyle.FixedSingle;
+                            tempLblMessage.Location = new Point(panelViewMsg.Size.Width / 2 - tempLblMessage.Size.Width, STARTPOSY);
+
+                            panelViewMsg.Controls.Add(tempLblMessage);
+                            boxChat.Visible = true;
+                            indexContactSelected = indexContact;
+                        }
+                        else
+                            MessageBox.Show(error.ToString() + " per il contatto selezionato", "Errore ottenimento nuovi messaggi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    else
+                        MessageBox.Show("Nel server si è verificato un errore sconosciuto.", "Errore Sconosciuto", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Errore Ottenimento Messaggi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+        }
+
+        private void btnSendNewMsg_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (indexContactSelected >= 0)
+                {
+                    LibChatClient.User.Message newMsg;
+                    string msgText = inputNewMsg.Text;
+                    newMsg = new LibChatClient.User.Message(-1, UserID, UserContacts[indexContactSelected].ID, DateTime.Parse(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss")), msgText);
+                    string strContacts = SndMsg.Assemble(newMsg);
+                    string strServerRes = Connection.SendReceiveFromServer(ServerIP, strContacts);
+                    strServerRes = Protocols.RemoveTerminator(strServerRes);
+
+                    if (Protocols.GetStatus(strServerRes))
+                    {
+                        inputNewMsg.Text = String.Empty;
+                        lstContacts_SelectedIndexChanged(sender, e);
+                    }
+                    else
+                    {
+                        ErrorsType error;
+                        if (ErrorType.TryParse(strServerRes, out error))
+                            MessageBox.Show(error.ToString(), "Errore Invio Messaggio", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        else
+                            MessageBox.Show("Nel server si è verificato un errore sconosciuto.", "Errore Sconosciuto", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                else
+                    MessageBox.Show("Prima di Inviare il Messaggio Selezionare un contatto a cui mandarlo adalla barra contatti a sinistra.", "Errore Invio Messaggio", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        private void label1_MouseHover(object sender, EventArgs e)
+        {
+            toolTipMessages.ToolTipTitle = "Messaggio";
+            toolTipMessages.ToolTipIcon = ToolTipIcon.Info;
+            toolTipMessages.Show("Test LAbel MEssage\r\nAAAAA\r\naaaaaaaaa", label1);
+        }
+    }
+}

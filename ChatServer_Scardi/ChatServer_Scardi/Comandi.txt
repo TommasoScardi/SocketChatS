@@ -1,0 +1,37 @@
+﻿//Registrazione di un nuovo Utente
+//Sintassi: NomeUtente, PasswordUtente,IPDoveAvvieneLaRegistrazioneUtente
+<NEWUSERREG>Tom,Tom,127.0.0.1<EOF>
+<NEWUSERREG>Mas,Mas,127.0.0.1<EOF>
+<NEWUSERREG>Sim,Sim,127.0.0.1<EOF>
+
+//Autenticazione Contatti precedentemente Creati
+//Sintassi: NomeUtente PasswordUtente, IPInUtilizzoUtente
+<AUTH>Tom,Tom,127.0.0.1<EOF>
+<AUTH>Mas,Mas,127.0.0.1<EOF>
+<AUTH>Sim,Sim,127.0.0.1<EOF>
+
+//Associazione Utente (ID NON è UN COMANDO)
+//Tom ID->3
+//Mas ID->4
+//Sim ID->5
+
+//Aggiunta contatti agli utenti selezionati dato l'ID dell utente e il nome del Utente che si vuole aggiungere come contatto
+//Sintassi: IDUtenteCuiAggiungereIlContatto, NomeUtenteDelContattoDaAggiungere
+<NEWCONTACT>3,Mas<EOF>
+<NEWCONTACT>4,Tom<EOF>
+
+//Richiesta Contatti dei un Utente
+//Sintassi: IDUtenteRichiedente
+<REQCONTACTS>3<EOF>
+
+//Caricamento di Un Contatto dat l'Utente e il contatto da caricare
+//Sintassi: IDUtenteRichiedente,IDContattoDaCaricare
+<LOADCONTACT>3,1<EOF>
+
+//Invio di un messaggio
+//Sintassi: IDUtenteMittente,IDContattoDestinatario,DateTimeInvioMessaggio,TestoMessaggio
+<SNDMSG>3,1,1/1/2000 12:00:00,Test Invio messaggio da Tom(3) via protocollo con Console<EOF>
+
+<REQNEWMSG>3,1,1/1/2000 11:30:00<EOF>
+
+<DEAUTH>3<EOS>

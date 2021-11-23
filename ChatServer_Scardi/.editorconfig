@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# IDE0011: Aggiungi parentesi graffe
+dotnet_diagnostic.IDE0011.severity = none

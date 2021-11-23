@@ -1,0 +1,60 @@
+﻿
+
+            //User.UserCreation("tom", "tom", IPAddress.Parse("192.168.1.1"));
+            //User.UserCreation("mas", "mas", IPAddress.Parse("192.168.1.1"));
+            //User user1 = new User("tom", "tom");
+            //User user2 = new User("mas", "mas");
+
+            /*Console.WriteLine($"Contatti {user1.UserName}: ");
+            foreach (Contact contact in user1.GetContacts())
+            {
+                Console.WriteLine(contact.ContactUserName);
+            }
+            Console.WriteLine($"Contatti {user2.UserName}: ");
+            foreach (Contact contact in ServerDB.GetUserContacts(user2))
+            {
+                Console.WriteLine(contact.ContactUserName);
+            }*/
+
+            //user1.AddContact(new Contact(user2));
+            //user2.AddContact(new Contact(user1));
+            //Message message1 = new Message(user1, user1.UserContacts[0], true, "testo messaggio invaito da sistema di invio messaggi");
+            //user1.SendMessage(user1.UserContacts[0], message1);
+            //Console.WriteLine($"\nContatti {user1.UserName}: ");
+            ////user1.UserContacts[0].ContactMessages[0];
+            //foreach (Contact contact in user1.UserContacts)
+            //{
+            //    Console.WriteLine(contact);
+            //    Console.WriteLine("Messaggi dal contatto: ");
+            //    foreach (Message message in contact.ContactMessages) //user1.GetMessages(contact)
+            //    {
+            //        Console.WriteLine(message);
+            //    }
+            //}
+            //Console.WriteLine($"Contatti {user2.UserName}: ");
+
+            /*Vecchio modo con passaggio diretto dal DB - BANDITO
+            foreach (Contact contact in ServerDB.GetUserContacts(user2))
+            {
+                Console.WriteLine(contact.ContactUserName);
+            }*/
+
+            /*foreach (Contact contact in user2.UserContacts)
+            {
+                Console.WriteLine(contact);
+            }
+            Contacts contacts = new Contacts(user2);
+            Console.WriteLine(contacts[0].ToString());
+            Contacts c = new Contacts(user1);*/
+
+            string test = "<AUTH>tom,tom,192.168.1.1<EOF>";
+            test = "<SNDMSG>2,4,11/02/2020 12:15,ciao sei brutto ma tanto tanto,puzzi<EOF>";
+            string tp = "";
+            Console.Write(Protocols.RemoveProtocolInString(test, ref tp));
+            Console.WriteLine(" " + tp);
+            Protocol p = Protocols.ParseDataProtocol(test);
+            Console.WriteLine(p.ProtocolType);
+            foreach (var item in p.ProtocolDatas)
+            {
+                Console.WriteLine("   " + item);
+            }
