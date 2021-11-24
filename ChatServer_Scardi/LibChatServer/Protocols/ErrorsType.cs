@@ -26,6 +26,7 @@
         NewContactGeneric = 500,
         NewContactInexistent = 501,
         NewContactUnableToAdd = 502,
+        NewContactIsTheUserAdding = 503,
 
         ReqNewMsgGeneric = 600,
         ReqNewMsgNoNewMsg = 601,
