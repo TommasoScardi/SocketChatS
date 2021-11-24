@@ -116,6 +116,11 @@ namespace LibChatServer
             return ServerDB.ContactUserExist(user, contact);
         }
 
+        public static bool VerifyContactIsNotSameUser(User user, Contact contact)
+        {
+            return user.UserID == contact.ContactUserID || user.UserName == contact.ContactUserName;
+        }
+
         //Funzione STATICA per la creazione di nuovi utenti, DA REVISIONARE
         public static bool UserCreation(string userName, string userPwd, IPAddress userIpAddress)
         {
