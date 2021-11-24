@@ -171,9 +171,14 @@ namespace ChatServer_Scardi
                                                 {
                                                     if (serverUsers.ContainsKey(tempUser.UserID))
                                                     {
-                                                        serverUsers[int.Parse(protocolDatas[NewContact.UserID])].AddContact(new Contact(protocolDatas[NewContact.UserContactName]));
-                                                        incomingProtocolClient = "<OK><EOF>"; //"Contatto Aggiunto all utente Selezionato"
-                                                        Console.WriteLine($"New Contact Added -> {protocolDatas[NewContact.UserID]} To -> {tempUser.UserID}");
+                                                        if (!User.VerifyContactIsNotSameUser(serverUsers[int.Parse(protocolDatas[NewContact.UserID])], new Contact(protocolDatas[NewContact.UserContactName])))
+                                                        {
+                                                            serverUsers[int.Parse(protocolDatas[NewContact.UserID])].AddContact(new Contact(protocolDatas[NewContact.UserContactName]));
+                                                            incomingProtocolClient = "<OK><EOF>"; //"Contatto Aggiunto all utente Selezionato"
+                                                            Console.WriteLine($"New Contact Added -> {protocolDatas[NewContact.UserID]} To -> {tempUser.UserID}");
+                                                        }
+                                                        else
+                                                            incomingProtocolClient = ErrorType.ToString(ErrorsType.NewContactIsTheUserAdding);
                                                     }
                                                     else
                                                         //Simulazione invio messaggio di errore al client
