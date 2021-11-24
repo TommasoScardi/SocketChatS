@@ -1209,11 +1209,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Tommaso\\Documents\\Visual Studio 2019\\Projects\\ChatServer_Scardi\\ChatServer_Scardi\\ChatServer_Scardi.csproj",
+      "projectUniqueName": "C:\\Users\\Tommaso\\Documents\\GitHub\\SocketChatS\\ChatServer_Scardi\\ChatServer_Scardi\\ChatServer_Scardi.csproj",
       "projectName": "ChatServer_Scardi",
-      "projectPath": "C:\\Users\\Tommaso\\Documents\\Visual Studio 2019\\Projects\\ChatServer_Scardi\\ChatServer_Scardi\\ChatServer_Scardi.csproj",
+      "projectPath": "C:\\Users\\Tommaso\\Documents\\GitHub\\SocketChatS\\ChatServer_Scardi\\ChatServer_Scardi\\ChatServer_Scardi.csproj",
       "packagesPath": "C:\\Users\\Tommaso\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Tommaso\\Documents\\Visual Studio 2019\\Projects\\ChatServer_Scardi\\ChatServer_Scardi\\obj\\",
+      "outputPath": "C:\\Users\\Tommaso\\Documents\\GitHub\\SocketChatS\\ChatServer_Scardi\\ChatServer_Scardi\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Tommaso\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -1230,8 +1230,8 @@
         "net5.0": {
           "targetAlias": "net5.0",
           "projectReferences": {
-            "C:\\Users\\Tommaso\\Documents\\Visual Studio 2019\\Projects\\ChatServer_Scardi\\LibChatServer\\LibChatServer.csproj": {
-              "projectPath": "C:\\Users\\Tommaso\\Documents\\Visual Studio 2019\\Projects\\ChatServer_Scardi\\LibChatServer\\LibChatServer.csproj"
+            "C:\\Users\\Tommaso\\Documents\\GitHub\\SocketChatS\\ChatServer_Scardi\\LibChatServer\\LibChatServer.csproj": {
+              "projectPath": "C:\\Users\\Tommaso\\Documents\\GitHub\\SocketChatS\\ChatServer_Scardi\\LibChatServer\\LibChatServer.csproj"
             }
           }
         }

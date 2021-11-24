@@ -291,7 +291,6 @@ namespace ChatClient_Scardi
             this.label3.Size = new System.Drawing.Size(350, 21);
             this.label3.TabIndex = 0;
             this.label3.Text = "Testo di prova ricevuto da un contatto kjbasklbloaregboiergnlaebngilgn";
-            this.label3.MouseHover += new System.EventHandler(this.label1_MouseHover);
             // 
             // label1
             // 
@@ -305,7 +304,6 @@ namespace ChatClient_Scardi
             this.label1.Size = new System.Drawing.Size(350, 21);
             this.label1.TabIndex = 0;
             this.label1.Text = "Testo di prova ricevuto da un contatto kjbasklbloaregboiergnlaebngilgn";
-            this.label1.MouseHover += new System.EventHandler(this.label1_MouseHover);
             // 
             // panelSendMsg
             // 

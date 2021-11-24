@@ -79,6 +79,7 @@ namespace LibChatClient.Connections
             Ping verifyIP = new Ping();
             int timeout = 120;
             PingReply reply = verifyIP.Send(iPAddressToVerify, timeout);
+            //PingReply reply = verifyIP.Send(IPAddress.Parse("1.1.1.1"), timeout); //Attenzione, questa stringa limita l'uso dei client a quelli connessi a internet
 
             if (reply.Status == IPStatus.Success)
                 return true;
@@ -91,12 +92,16 @@ namespace LibChatClient.Connections
             IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
             foreach (IPAddress iPAddress in ipHostInfo.AddressList)
             {
-                if (VerifyIpAddress(iPAddress))
-                    return iPAddress.MapToIPv4();
+                if (iPAddress.ToString().Count(c => c == '.') == 3)
+                {
+                    if (VerifyIpAddress(iPAddress))
+                        return iPAddress;
+                    else
+                        continue;
+                }
                 else
                     continue;
             }
-
             return null;
         }
     }

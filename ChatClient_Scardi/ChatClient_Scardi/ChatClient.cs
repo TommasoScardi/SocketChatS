@@ -454,7 +454,7 @@ namespace ChatClient_Scardi
 
         private void lstContacts_SelectedIndexChanged(object sender, EventArgs e)
         {
-            const int POSXL = 10, POSXR = 560, STARTPOSY = 10, MSGMAXLENGTH = 70, DELTAMSGMAXL = 5, LBLPADDING = 3, DELTAXRMOVER = 50;
+            const int POSXL = 10, STARTPOSY = 10, MSGMAXLENGTH = 70, DELTAMSGMAXL = 5, LBLPADDING = 3, DELTAXRMOVER = 50;
             try
             {
                 indexContactSelected = -1;
@@ -497,6 +497,10 @@ namespace ChatClient_Scardi
                         Label tempLblMessage = new Label();
                         tempLblMessage.Font = new Font(new FontFamily("Consolas"), 8.50f);
 
+                        tempLblMessage.MouseHover += (a, b) =>
+                        {
+                            toolTipMessages.Show($"ID: {message.ID}\r\nMitt: {(message.UserSenderID == UserID ? UserName : UserContacts[indexContact].UserName)}\r\nDest: {(message.ContactReceiverID == UserID ? UserName : UserContacts[indexContact].UserName)}\r\nDT invio: {message.DateTimeSend}", tempLblMessage);
+                        };
                         tempLblMessage.Text = msgText;
                         tempLblMessage.AutoSize = true;
                         tempLblMessage.Padding = new Padding(LBLPADDING);
@@ -593,13 +597,6 @@ namespace ChatClient_Scardi
 
                 throw;
             }
-        }
-
-        private void label1_MouseHover(object sender, EventArgs e)
-        {
-            toolTipMessages.ToolTipTitle = "Messaggio";
-            toolTipMessages.ToolTipIcon = ToolTipIcon.Info;
-            toolTipMessages.Show("Test LAbel MEssage\r\nAAAAA\r\naaaaaaaaa", label1);
         }
     }
 }

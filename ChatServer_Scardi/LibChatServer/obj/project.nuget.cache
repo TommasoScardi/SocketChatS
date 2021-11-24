@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "9jOL+Ie1NZ3v2YSovZ/THmQqVYIVn3K802iUi6hZ/3UV+8GsIckGshPkGOcprt2JgCDG6docsW/Q0EQBb8QRkQ==",
+  "dgSpecHash": "XkKicTSxPG1THZE0M6ZfBD1Oe4UwZ3btGJ+NOEQdGgotzEtK3khwCcmXoeUU1HbzSPyGt99cJPB3HgPjlWxi0A==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Tommaso\\Documents\\Visual Studio 2019\\Projects\\ChatServer_Scardi\\LibChatServer\\LibChatServer.csproj",
+  "projectFilePath": "C:\\Users\\Tommaso\\Documents\\GitHub\\SocketChatS\\ChatServer_Scardi\\LibChatServer\\LibChatServer.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Tommaso\\.nuget\\packages\\dapper\\2.0.123\\dapper.2.0.123.nupkg.sha512",
     "C:\\Users\\Tommaso\\.nuget\\packages\\entityframework\\6.4.4\\entityframework.6.4.4.nupkg.sha512",

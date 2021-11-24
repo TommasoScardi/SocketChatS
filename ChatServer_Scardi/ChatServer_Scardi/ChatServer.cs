@@ -16,7 +16,7 @@ namespace ChatServer_Scardi
             IPAddress ServerIP;
             byte[] bytes = new byte[2048];
             Dictionary<int, User> serverUsers = new Dictionary<int, User>();
-            string incomingProtocolClient = ""; //<NEWUSERREG>Tom,Tom,127.0.0.1<EOF> <AUTH>Tom,Tom,127.0.0.1<EOF>
+            string incomingProtocolClient = "";
 
             ProtocolsType protocol = ProtocolsType.Null;
             string[] protocolDatas = null;
@@ -86,6 +86,7 @@ namespace ChatServer_Scardi
                                 Console.WriteLine(incomingProtocolClient);
                                 try
                                 {
+                                    IPAddress clientIp = (handler.RemoteEndPoint as IPEndPoint).Address;
                                     User tempUser;
                                     switch (protocol)
                                     {
@@ -115,7 +116,7 @@ namespace ChatServer_Scardi
                                                 if (tempUser is not null)//VERIFICA SE L'UTENTE ESISTE NEL DB
                                                 {
                                                     //Se l'utente esiste verifico se si è gia autenticato
-                                                    if (serverUsers.ContainsKey(tempUser.UserID))
+                                                    if (serverUsers.ContainsKey(tempUser.UserID) && String.Equals(clientIp.ToString(), tempUser.UserIpAddress.ToString()))
                                                     {
                                                         serverUsers.Remove(int.Parse(protocolDatas[DeAuth.UserID]));
                                                         incomingProtocolClient = "<OK><EOF>"; //Utente deAutenticato con successo, invio la conferma trasmettendo il suo ID negativo
@@ -139,7 +140,7 @@ namespace ChatServer_Scardi
                                                 tempUser = User.Exist(int.Parse(protocolDatas[ReqContacts.UserID]));//VERIFICA SE L'UTENTE ESISTE NEL DB
                                                 if (tempUser is not null)//VERIFICA SE L'UTENTE ESISTE NEL DB
                                                 {
-                                                    if (serverUsers.ContainsKey(tempUser.UserID))
+                                                    if (serverUsers.ContainsKey(tempUser.UserID) && String.Equals(clientIp.ToString(), tempUser.UserIpAddress.ToString()))
                                                     {
                                                         if (serverUsers[int.Parse(protocolDatas[ReqContacts.UserID])].UserContacts.GetContact is not null)
                                                         {
@@ -169,13 +170,13 @@ namespace ChatServer_Scardi
                                                 tempUser = User.Exist(int.Parse(protocolDatas[NewContact.UserID]));//VERIFICA SE L'UTENTE ESISTE NEL DB
                                                 if (tempUser is not null)//VERIFICA SE L'UTENTE ESISTE NEL DB
                                                 {
-                                                    if (serverUsers.ContainsKey(tempUser.UserID))
+                                                    if (serverUsers.ContainsKey(tempUser.UserID) && String.Equals(clientIp.ToString(), tempUser.UserIpAddress.ToString()))
                                                     {
                                                         if (!User.VerifyContactIsNotSameUser(serverUsers[int.Parse(protocolDatas[NewContact.UserID])], new Contact(protocolDatas[NewContact.UserContactName])))
                                                         {
                                                             serverUsers[int.Parse(protocolDatas[NewContact.UserID])].AddContact(new Contact(protocolDatas[NewContact.UserContactName]));
                                                             incomingProtocolClient = "<OK><EOF>"; //"Contatto Aggiunto all utente Selezionato"
-                                                            Console.WriteLine($"New Contact Added -> {protocolDatas[NewContact.UserID]} To -> {tempUser.UserID}");
+                                                            Console.WriteLine($"New Contact Added -> {protocolDatas[NewContact.UserContactName]} To -> {tempUser.UserID}");
                                                         }
                                                         else
                                                             incomingProtocolClient = ErrorType.ToString(ErrorsType.NewContactIsTheUserAdding);
@@ -193,7 +194,7 @@ namespace ChatServer_Scardi
                                                 tempUser = User.Exist(int.Parse(protocolDatas[LoadContact.UserID]));//VERIFICA SE L'UTENTE ESISTE NEL DB
                                                 if (tempUser is not null)//VERIFICA SE L'UTENTE ESISTE NEL DB
                                                 {
-                                                    if (serverUsers.ContainsKey(tempUser.UserID))
+                                                    if (serverUsers.ContainsKey(tempUser.UserID) && String.Equals(clientIp.ToString(), tempUser.UserIpAddress.ToString()))
                                                     {
                                                         if (User.ContactUserExist(serverUsers[tempUser.UserID], serverUsers[tempUser.UserID].UserContacts[int.Parse(protocolDatas[LoadContact.ContactID])]))
                                                         {
@@ -207,7 +208,7 @@ namespace ChatServer_Scardi
                                                                 //}
                                                                 //Console.WriteLine("Fine Messaggi.");
                                                                 incomingProtocolClient = XmlAssembler.Messages(serverUsers[int.Parse(protocolDatas[LoadContact.UserID])].UserContacts[int.Parse(protocolDatas[LoadContact.ContactID])]) + "<EOF>";
-                                                                Console.WriteLine($"Contact Loaded -> {protocolDatas[LoadContact.UserID]} From User -> {tempUser.UserID}");
+                                                                Console.WriteLine($"Contact Loaded -> {protocolDatas[LoadContact.ContactID]} From User -> {tempUser.UserID}");
                                                             }
                                                             else
                                                                 incomingProtocolClient = ErrorType.ToString(ErrorsType.LoadContactMessageEmpty); //$"Nessun Messaggio presente per il Conatto: {serverUsers[int.Parse(protocolDatas[LoadContact.UserID])]}"
@@ -229,7 +230,7 @@ namespace ChatServer_Scardi
                                                 tempUser = User.Exist(int.Parse(protocolDatas[ReqNewMsg.UserID]));//VERIFICA SE L'UTENTE ESISTE NEL DB
                                                 if (tempUser is not null)//VERIFICA SE L'UTENTE ESISTE NEL DB
                                                 {
-                                                    if (serverUsers.ContainsKey(tempUser.UserID))
+                                                    if (serverUsers.ContainsKey(tempUser.UserID) && String.Equals(clientIp.ToString(), tempUser.UserIpAddress.ToString()))
                                                     {
                                                         if (User.ContactUserExist(serverUsers[tempUser.UserID], serverUsers[tempUser.UserID].UserContacts[int.Parse(protocolDatas[LoadContact.ContactID])]))
                                                         {
@@ -243,7 +244,7 @@ namespace ChatServer_Scardi
                                                                 //}
                                                                 //Console.WriteLine("Fine Nuovi Messaggi.");
                                                                 incomingProtocolClient = XmlAssembler.Messages(serverUsers[int.Parse(protocolDatas[ReqNewMsg.UserID])].UserContacts[int.Parse(protocolDatas[ReqNewMsg.ContactID])].GetMessagesFromDT(serverUsers[int.Parse(protocolDatas[ReqNewMsg.UserID])], DateTime.Parse(protocolDatas[ReqNewMsg.DTLastMessageReceived]))) + "<EOF>";
-                                                                Console.WriteLine($"New Messages Loaded of Contact -> {protocolDatas[ReqNewMsg.UserID]} From User -> {tempUser.UserID}");
+                                                                Console.WriteLine($"New Messages Loaded of Contact -> {protocolDatas[ReqNewMsg.ContactID]} From User -> {tempUser.UserID}");
                                                             }
                                                             else
                                                                 incomingProtocolClient = ErrorType.ToString(ErrorsType.ReqNewMsgNoNewMsg); //$"Nessun Nuovo ({protocolDatas[ReqNewMsg.DTLastMessageReceived]}) Messaggio trovato per il Contatto: ({protocolDatas[ReqNewMsg.ContactID]}) associato all Utente Specificato ({protocolDatas[ReqNewMsg.UserID]})"
@@ -264,7 +265,7 @@ namespace ChatServer_Scardi
                                                 tempUser = User.Exist(int.Parse(protocolDatas[SndMsg.UserID]));//VERIFICA SE L'UTENTE ESISTE NEL DB
                                                 if (tempUser is not null)//VERIFICA SE L'UTENTE ESISTE NEL DB
                                                 {
-                                                    if (serverUsers.ContainsKey(tempUser.UserID))
+                                                    if (serverUsers.ContainsKey(tempUser.UserID) && String.Equals(clientIp.ToString(), tempUser.UserIpAddress.ToString()))
                                                     {
                                                         if (User.ContactUserExist(serverUsers[tempUser.UserID], serverUsers[tempUser.UserID].UserContacts[int.Parse(protocolDatas[SndMsg.ContactIDReceiver])]))
                                                         {
@@ -273,7 +274,7 @@ namespace ChatServer_Scardi
                                                             Message msgToSend = inputDateTime ? new Message(serverUsers[tempUser.UserID], serverUsers[tempUser.UserID].UserContacts[int.Parse(protocolDatas[SndMsg.ContactIDReceiver])], DateTime.Parse(protocolDatas[SndMsg.MessageDateTime]), protocolDatas[SndMsg.MessageText]) : new Message(serverUsers[tempUser.UserID], serverUsers[tempUser.UserID].UserContacts[int.Parse(protocolDatas[SndMsg.ContactIDReceiver])], protocolDatas[SndMsg.MessageText]);
                                                             serverUsers[tempUser.UserID].UserContacts[int.Parse(protocolDatas[SndMsg.ContactIDReceiver])].SendNewMsg(serverUsers[tempUser.UserID], msgToSend);
                                                             incomingProtocolClient = "<OK><EOF>"; //"Messaggio Inviato"
-                                                            Console.WriteLine($"New Message Send To -> {protocolDatas[SndMsg.UserID]} From User -> {tempUser.UserID}");
+                                                            Console.WriteLine($"New Message Send To -> {protocolDatas[SndMsg.ContactIDReceiver]} From User -> {tempUser.UserID}");
                                                         }
                                                         else
                                                             incomingProtocolClient = ErrorType.ToString(ErrorsType.SndMsgContactInexistent); //$"Nessun Messaggio trovato per il Contatto associato ({protocolDatas[LoadContact.ContactID]}) all Utente Specificato ({protocolDatas[LoadContact.UserID]})"

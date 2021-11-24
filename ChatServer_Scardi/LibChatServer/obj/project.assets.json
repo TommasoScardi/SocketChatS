@@ -1190,11 +1190,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Tommaso\\Documents\\Visual Studio 2019\\Projects\\ChatServer_Scardi\\LibChatServer\\LibChatServer.csproj",
+      "projectUniqueName": "C:\\Users\\Tommaso\\Documents\\GitHub\\SocketChatS\\ChatServer_Scardi\\LibChatServer\\LibChatServer.csproj",
       "projectName": "LibChatServer",
-      "projectPath": "C:\\Users\\Tommaso\\Documents\\Visual Studio 2019\\Projects\\ChatServer_Scardi\\LibChatServer\\LibChatServer.csproj",
+      "projectPath": "C:\\Users\\Tommaso\\Documents\\GitHub\\SocketChatS\\ChatServer_Scardi\\LibChatServer\\LibChatServer.csproj",
       "packagesPath": "C:\\Users\\Tommaso\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Tommaso\\Documents\\Visual Studio 2019\\Projects\\ChatServer_Scardi\\LibChatServer\\obj\\",
+      "outputPath": "C:\\Users\\Tommaso\\Documents\\GitHub\\SocketChatS\\ChatServer_Scardi\\LibChatServer\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Tommaso\\AppData\\Roaming\\NuGet\\NuGet.Config",
