@@ -59,6 +59,8 @@ namespace ChatClient_Scardi
             this.inputNewMsg = new System.Windows.Forms.RichTextBox();
             this.btnSendNewMsg = new System.Windows.Forms.Button();
             this.toolTipMessages = new System.Windows.Forms.ToolTip(this.components);
+            this.messaggiToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.interrompiTimerMessaggiToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenu.SuspendLayout();
             this.mainElement.SuspendLayout();
             this.boxContacts.SuspendLayout();
@@ -72,7 +74,8 @@ namespace ChatClient_Scardi
             this.mainMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.connessioneToolStripMenuItem,
             this.utenteToolStripMenuItem,
-            this.contattiToolStripMenuItem});
+            this.contattiToolStripMenuItem,
+            this.messaggiToolStripMenuItem});
             this.mainMenu.Location = new System.Drawing.Point(0, 0);
             this.mainMenu.Name = "mainMenu";
             this.mainMenu.Size = new System.Drawing.Size(800, 24);
@@ -166,19 +169,19 @@ namespace ChatClient_Scardi
             // aggiornaContattiToolStripMenuItem
             // 
             this.aggiornaContattiToolStripMenuItem.Name = "aggiornaContattiToolStripMenuItem";
-            this.aggiornaContattiToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+            this.aggiornaContattiToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.aggiornaContattiToolStripMenuItem.Text = "Aggiorna Contatti";
             this.aggiornaContattiToolStripMenuItem.Click += new System.EventHandler(this.aggiornaContattiToolStripMenuItem_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(170, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(177, 6);
             // 
             // aggiungiContattoToolStripMenuItem
             // 
             this.aggiungiContattoToolStripMenuItem.Name = "aggiungiContattoToolStripMenuItem";
-            this.aggiungiContattoToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+            this.aggiungiContattoToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.aggiungiContattoToolStripMenuItem.Text = "Aggiungi Contatto";
             this.aggiungiContattoToolStripMenuItem.Click += new System.EventHandler(this.aggiungiContattoToolStripMenuItem_Click);
             // 
@@ -340,6 +343,21 @@ namespace ChatClient_Scardi
             this.btnSendNewMsg.UseVisualStyleBackColor = true;
             this.btnSendNewMsg.Click += new System.EventHandler(this.btnSendNewMsg_Click);
             // 
+            // messaggiToolStripMenuItem
+            // 
+            this.messaggiToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.interrompiTimerMessaggiToolStripMenuItem});
+            this.messaggiToolStripMenuItem.Name = "messaggiToolStripMenuItem";
+            this.messaggiToolStripMenuItem.Size = new System.Drawing.Size(69, 20);
+            this.messaggiToolStripMenuItem.Text = "Messaggi";
+            // 
+            // interrompiTimerMessaggiToolStripMenuItem
+            // 
+            this.interrompiTimerMessaggiToolStripMenuItem.Name = "interrompiTimerMessaggiToolStripMenuItem";
+            this.interrompiTimerMessaggiToolStripMenuItem.Size = new System.Drawing.Size(216, 22);
+            this.interrompiTimerMessaggiToolStripMenuItem.Text = "Interrompi Timer Messaggi";
+            this.interrompiTimerMessaggiToolStripMenuItem.Click += new System.EventHandler(this.interrompiTimerMessaggiToolStripMenuItem_Click);
+            // 
             // ChatClient
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -397,6 +415,8 @@ namespace ChatClient_Scardi
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ToolStripMenuItem messaggiToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem interrompiTimerMessaggiToolStripMenuItem;
     }
 }
 

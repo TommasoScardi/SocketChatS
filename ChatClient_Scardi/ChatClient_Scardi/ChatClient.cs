@@ -28,6 +28,11 @@ namespace ChatClient_Scardi
         Contact[] UserContacts;
         int indexContactSelected = -1;
 
+        bool usoTimerFetchNewMsg = true;
+        Timer fetchNewMsg;
+        DateTime lastFetchNewMsg = DateTime.MinValue;
+        int lastHeightMsg = 0;
+
         public ChatClient()
         {
             InitializeComponent();
@@ -56,6 +61,11 @@ namespace ChatClient_Scardi
             aggiungiContattoToolStripMenuItem.Enabled = false;
             aggiornaContattiToolStripMenuItem.Enabled = false;
 
+            messaggiToolStripMenuItem.Visible = false;
+            messaggiToolStripMenuItem.Enabled = false;
+            interrompiTimerMessaggiToolStripMenuItem.Visible = false;
+            interrompiTimerMessaggiToolStripMenuItem.Enabled = false;
+
         }
         
         private void ActivateContactsControls()
@@ -67,6 +77,11 @@ namespace ChatClient_Scardi
             contattiToolStripMenuItem.Enabled = true;
             aggiungiContattoToolStripMenuItem.Enabled = true;
             aggiornaContattiToolStripMenuItem.Enabled = true;
+
+            messaggiToolStripMenuItem.Visible = true;
+            messaggiToolStripMenuItem.Enabled = true;
+            interrompiTimerMessaggiToolStripMenuItem.Visible = true;
+            interrompiTimerMessaggiToolStripMenuItem.Enabled = true;
 
         }
 
@@ -328,6 +343,9 @@ namespace ChatClient_Scardi
                 {
                     if (UserID > 0)
                     {
+                        if (fetchNewMsg != null) fetchNewMsg.Enabled = false;
+                        fetchNewMsg = null;
+
                         string tempUName = UserName;
                         UserID = -1;
                         UserName = null;
@@ -412,6 +430,25 @@ namespace ChatClient_Scardi
             btnAddContact_Click(sender, e);
         }
 
+        private void interrompiTimerMessaggiToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (usoTimerFetchNewMsg)
+            {
+                if (fetchNewMsg != null) fetchNewMsg.Enabled = false;
+                fetchNewMsg = null;
+
+                usoTimerFetchNewMsg = false;
+                interrompiTimerMessaggiToolStripMenuItem.Checked = true;
+                //interrompiTimerMessaggiToolStripMenuItem.Text = "Avvia Timer Messaggi";
+            }
+            else
+            {
+                usoTimerFetchNewMsg = true;
+                interrompiTimerMessaggiToolStripMenuItem.Checked = false;
+                //interrompiTimerMessaggiToolStripMenuItem.Text = "Interrompi Timer Messaggi";
+            }
+        }
+
         private void btnAddContact_Click(object sender, EventArgs e)
         {
             ManagementWindow.MWindow m = new ManagementWindow.MWindow(ManagementWindow.Type.NewContact);
@@ -454,10 +491,26 @@ namespace ChatClient_Scardi
 
         private void lstContacts_SelectedIndexChanged(object sender, EventArgs e)
         {
-            const int POSXL = 10, STARTPOSY = 10, MSGMAXLENGTH = 70, DELTAMSGMAXL = 5, LBLPADDING = 3, DELTAXRMOVER = 50;
+            const int POSXL = 10, 
+                STARTPOSY = 10, 
+                MSGMAXLENGTH = 70, 
+                DELTAMSGMAXL = 5, 
+                LBLPADDING = 3, 
+                MSGWIDTHFIT = 422, //La costante di lunghezza che riempie senza sbordare bene la riga di un messaggio allineato a destra
+                DELTAXRMOVER_MSGWIDTHFIT = 50;
+
             try
             {
                 indexContactSelected = -1;
+                if (usoTimerFetchNewMsg)
+                {
+                    if (fetchNewMsg != null) fetchNewMsg.Enabled = false;
+                    fetchNewMsg = null;
+                    fetchNewMsg = new Timer();
+                    fetchNewMsg.Interval = 2000;
+                    fetchNewMsg.Tick += FetchMsg_Tick;
+                }
+
                 int indexContact = lstContacts.SelectedIndex;
                 string[] datas = { UserID.ToString() , UserContacts[indexContact].ID.ToString() };
                 string strContacts = LoadContact.Assemble(int.Parse(datas[LoadContact.UserID]), int.Parse(datas[LoadContact.ContactID]));
@@ -473,7 +526,7 @@ namespace ChatClient_Scardi
                     panelViewMsg.Controls.Clear();
 
                     List<Label> messages = new List<Label>();
-                    int posXR = 0, posY = STARTPOSY;
+                    int deltaXR = 0, posY = STARTPOSY, msgWidth = 0;
                     int strRow = 0, adderHeigth = 30;
                     string msgText = String.Empty;
 
@@ -506,21 +559,34 @@ namespace ChatClient_Scardi
                         tempLblMessage.Padding = new Padding(LBLPADDING);
                         tempLblMessage.BorderStyle = BorderStyle.FixedSingle;
 
-                        using (Graphics g = CreateGraphics())
+                        if (message.UserSenderID == UserID)
                         {
-                            SizeF size = g.MeasureString(tempLblMessage.Text, tempLblMessage.Font);
-                            posXR = (int)Math.Ceiling(size.Width);
+                            using (Graphics g = CreateGraphics())
+                            {
+                                SizeF size = g.MeasureString(tempLblMessage.Text, tempLblMessage.Font);
+                                msgWidth = (int)Math.Ceiling(size.Width);
+                                deltaXR = msgWidth * DELTAXRMOVER_MSGWIDTHFIT / MSGWIDTHFIT;
+                                if (deltaXR < DELTAXRMOVER_MSGWIDTHFIT) deltaXR += 10;
+                            }
+                            tempLblMessage.Location = new Point(panelViewMsg.Size.Width - (msgWidth + deltaXR), posY);
                         }
-                        tempLblMessage.Location = new Point((message.ContactReceiverID == UserID ? POSXL : panelViewMsg.Size.Width - (posXR + DELTAXRMOVER)), posY);
+                        else
+                            tempLblMessage.Location = new Point(POSXL, posY);
+
                         tempLblMessage.Anchor = message.ContactReceiverID == UserID ? AnchorStyles.Top | AnchorStyles.Left : AnchorStyles.Top | AnchorStyles.Right;
 
                         posY += (adderHeigth * (strRow > 0 ? strRow : 1));
                         messages.Add(tempLblMessage);
+                        strRow = 0;
                     }
 
                     panelViewMsg.Controls.AddRange(messages.ToArray());
                     boxChat.Visible = true;
+                    panelViewMsg.AutoScrollPosition = new Point(0,boxChat.Height);
+                    lastHeightMsg = posY;
+                    lastFetchNewMsg = DateTime.Now;
                     indexContactSelected = indexContact;
+                    if (usoTimerFetchNewMsg) fetchNewMsg.Enabled = true;
                 }
                 else
                 {
@@ -543,7 +609,10 @@ namespace ChatClient_Scardi
 
                             panelViewMsg.Controls.Add(tempLblMessage);
                             boxChat.Visible = true;
+                            lastHeightMsg = 0;
+                            lastFetchNewMsg = DateTime.MinValue;
                             indexContactSelected = indexContact;
+                            if (usoTimerFetchNewMsg) fetchNewMsg.Enabled = true;
                         }
                         else
                             MessageBox.Show(error.ToString() + " per il contatto selezionato", "Errore ottenimento nuovi messaggi", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -558,6 +627,125 @@ namespace ChatClient_Scardi
                 MessageBox.Show(ex.Message, "Errore Ottenimento Messaggi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
+        }
+
+        private void FetchMsg_Tick(object sender, EventArgs e)
+        {
+            const int POSXL = 10,
+                   STARTPOSY = 10,
+                   MSGMAXLENGTH = 70,
+                   DELTAMSGMAXL = 5,
+                   LBLPADDING = 3,
+                   MSGWIDTHFIT = 422, //La costante di lunghezza che riempie senza sbordare bene la riga di un messaggio allineato a destra
+                   DELTAXRMOVER_MSGWIDTHFIT = 50;
+
+            try
+            {
+                string[] datas = { UserID.ToString(), UserContacts[indexContactSelected].ID.ToString() };
+                string strContacts = ReqNewMsg.Assemble(int.Parse(datas[ReqNewMsg.UserID]), int.Parse(datas[ReqNewMsg.ContactID]), lastFetchNewMsg);
+                string strServerRes = Connection.SendReceiveFromServer(ServerIP, strContacts);
+                strServerRes = Protocols.RemoveTerminator(strServerRes);
+
+                if (!Protocols.VerifyServerError(strServerRes))
+                {
+                    UserContacts[indexContactSelected].Messages = XmlParser.ParseMessages(strServerRes);
+
+                    List<Label> messages = new List<Label>();
+                    int deltaXR = 0, posY = STARTPOSY, msgWidth = 0;
+                    int strRow = lastHeightMsg, adderHeigth = 30;
+                    string msgText = String.Empty;
+
+                    foreach (LibChatClient.User.Message message in UserContacts[indexContactSelected].Messages)
+                    {
+                        msgText = String.Empty;
+                        if (message.Text.Length > MSGMAXLENGTH + DELTAMSGMAXL)
+                        {
+                            int newLineToInsert = message.Text.Length / (MSGMAXLENGTH + DELTAMSGMAXL);
+                            for (strRow = 0; strRow < newLineToInsert; strRow++)
+                            {
+                                msgText += message.Text.Substring((MSGMAXLENGTH * strRow), (MSGMAXLENGTH * (strRow + 1)) - (MSGMAXLENGTH * strRow)) + "\r\n";
+                            }
+                            msgText += message.Text.Substring(MSGMAXLENGTH * strRow);
+                        }
+                        else
+                        {
+                            msgText = message.Text;
+                        }
+
+                        Label tempLblMessage = new Label();
+                        tempLblMessage.Font = new Font(new FontFamily("Consolas"), 8.50f);
+
+                        tempLblMessage.MouseHover += (a, b) =>
+                        {
+                            toolTipMessages.Show($"ID: {message.ID}\r\nMitt: {(message.UserSenderID == UserID ? UserName : UserContacts[indexContactSelected].UserName)}\r\nDest: {(message.ContactReceiverID == UserID ? UserName : UserContacts[indexContactSelected].UserName)}\r\nDT invio: {message.DateTimeSend}", tempLblMessage);
+                        };
+                        tempLblMessage.Text = msgText;
+                        tempLblMessage.AutoSize = true;
+                        tempLblMessage.Padding = new Padding(LBLPADDING);
+                        tempLblMessage.BorderStyle = BorderStyle.FixedSingle;
+
+                        if (message.UserSenderID == UserID)
+                        {
+                            using (Graphics g = CreateGraphics())
+                            {
+                                SizeF size = g.MeasureString(tempLblMessage.Text, tempLblMessage.Font);
+                                msgWidth = (int)Math.Ceiling(size.Width);
+                                deltaXR = msgWidth * DELTAXRMOVER_MSGWIDTHFIT / MSGWIDTHFIT;
+                                if (deltaXR < DELTAXRMOVER_MSGWIDTHFIT) deltaXR += 10;
+                            }
+                            tempLblMessage.Location = new Point(panelViewMsg.Size.Width - (msgWidth + deltaXR), posY);
+                        }
+                        else
+                            tempLblMessage.Location = new Point(POSXL, posY);
+
+                        tempLblMessage.Anchor = message.ContactReceiverID == UserID ? AnchorStyles.Top | AnchorStyles.Left : AnchorStyles.Top | AnchorStyles.Right;
+
+                        posY += (adderHeigth * (strRow > 0 ? strRow : 1));
+                        messages.Add(tempLblMessage);
+                        strRow = 0;
+                    }
+
+                    panelViewMsg.Controls.AddRange(messages.ToArray());
+                    panelViewMsg.AutoScrollPosition = new Point(0, boxChat.Height);
+                    lastHeightMsg = posY;
+                    lastFetchNewMsg = DateTime.Now;
+                }
+                else
+                {
+                    ErrorsType error;
+                    if (ErrorType.TryParse(strServerRes, out error))
+                    {
+                        if (error == ErrorsType.LoadContactMessageEmpty)
+                        {
+                            boxChat.Text = $"Chat con: {UserContacts[indexContactSelected].UserName}";
+
+                            panelViewMsg.Controls.Clear();
+
+                            Label tempLblMessage = new Label();
+                            tempLblMessage.Text = "Nessun messaggio presente in questa chat.\r\nPer iniziare la conversazione scrivi nella casella qua sotto e invia il messaggio";
+                            tempLblMessage.TextAlign = ContentAlignment.MiddleCenter;
+                            tempLblMessage.AutoSize = true;
+                            tempLblMessage.Padding = new Padding(LBLPADDING);
+                            tempLblMessage.BorderStyle = BorderStyle.FixedSingle;
+                            tempLblMessage.Location = new Point(panelViewMsg.Size.Width / 2 - tempLblMessage.Size.Width, STARTPOSY);
+
+                            panelViewMsg.Controls.Add(tempLblMessage);
+                            lastHeightMsg = 0;
+                            lastFetchNewMsg = DateTime.MinValue;
+                        }
+                        else if (error == ErrorsType.ReqNewMsgNoNewMsg)
+                        { }
+                        else
+                            MessageBox.Show(error.ToString() + " per il contatto selezionato", "Errore ottenimento nuovi messaggi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    else
+                        MessageBox.Show("Nel server si è verificato un errore sconosciuto.", "Errore Sconosciuto", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Errore ottenimento nuovi messaggi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void btnSendNewMsg_Click(object sender, EventArgs e)
