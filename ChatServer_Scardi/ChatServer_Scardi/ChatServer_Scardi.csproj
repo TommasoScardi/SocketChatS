@@ -8,24 +8,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="bin\Release\**" />
     <Compile Remove="Properties\**" />
+    <EmbeddedResource Remove="bin\Release\**" />
     <EmbeddedResource Remove="Properties\**" />
+    <None Remove="bin\Release\**" />
     <None Remove="Properties\**" />
   </ItemGroup>
 
   <ItemGroup>
     <None Remove="MainOld.txt" />
-    <None Remove="ServerDB.db" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="ServerDB.db">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
   <ItemGroup>
     <None Include="bin\Debug\net5.0\ServerDB.db" />
+    <None Include="bin\Release\net5.0\ServerDB.db" />
   </ItemGroup>
 
   <ItemGroup>

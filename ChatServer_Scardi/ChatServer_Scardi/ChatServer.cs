@@ -99,7 +99,7 @@ namespace ChatServer_Scardi
                                                     if (!serverUsers.ContainsKey(tempUser.UserID))
                                                     {
                                                         serverUsers.Add(tempUser.UserID, new User(protocolDatas));
-                                                        incomingProtocolClient = tempUser.UserID.ToString() + "<EOF>"; //$"Utente Autenticato con successo, IdUtente -> {tempUser.UserID} | {(String.Equals(protocolDatas[Auth.IpUtente], tempUser.UserIpAddress.ToString()) ? "IP -> " + tempUser.UserIpAddress : "IP ultimo accesso -> " + tempUser.UserIpAddress + " IP attuale -> " + protocolDatas[Auth.IpUtente])}"
+                                                        incomingProtocolClient = tempUser.UserID.ToString() + EOF.ProtocolString; //$"Utente Autenticato con successo, IdUtente -> {tempUser.UserID} | {(String.Equals(protocolDatas[Auth.IpUtente], tempUser.UserIpAddress.ToString()) ? "IP -> " + tempUser.UserIpAddress : "IP ultimo accesso -> " + tempUser.UserIpAddress + " IP attuale -> " + protocolDatas[Auth.IpUtente])}"
                                                         Console.WriteLine($"User Autenticated -> {tempUser.UserID}");
                                                     }
                                                     else
@@ -119,7 +119,7 @@ namespace ChatServer_Scardi
                                                     if (serverUsers.ContainsKey(tempUser.UserID) && String.Equals(clientIp.ToString(), tempUser.UserIpAddress.ToString()))
                                                     {
                                                         serverUsers.Remove(int.Parse(protocolDatas[DeAuth.UserID]));
-                                                        incomingProtocolClient = "<OK><EOF>"; //Utente deAutenticato con successo, invio la conferma trasmettendo il suo ID negativo
+                                                        incomingProtocolClient = $"{OK.ProtocolString}{EOF.ProtocolString}"; //Utente deAutenticato con successo, invio la conferma trasmettendo il suo ID negativo
                                                         Console.WriteLine($"User DeAutenticated -> {tempUser.UserID}");
                                                     }
                                                     else
@@ -132,7 +132,7 @@ namespace ChatServer_Scardi
                                             break;
                                         case ProtocolsType.NewUserReg:
                                             //Simulazione invio messaggio di errore/successo al client
-                                            incomingProtocolClient = User.UserCreation(protocolDatas) ? "<OK><EOF>" : ErrorType.ToString(ErrorsType.NewUserRegBadDatas); //Possibilità di aver inserito i dati male o presenza di un altro utente con le stesse credenziali
+                                            incomingProtocolClient = User.UserCreation(protocolDatas) ? $"{OK.ProtocolString}{EOF.ProtocolString}" : ErrorType.ToString(ErrorsType.NewUserRegBadDatas); //Possibilità di aver inserito i dati male o presenza di un altro utente con le stesse credenziali
                                             Console.WriteLine($"User Created -> {protocolDatas[NewUserReg.UserName]}");
                                             break;
                                         case ProtocolsType.ReqContacts:
@@ -151,7 +151,7 @@ namespace ChatServer_Scardi
                                                             //    Console.WriteLine($"  {contact}");
                                                             //}
                                                             //Console.WriteLine("Fine Contatti.");
-                                                            incomingProtocolClient = XmlAssembler.Contacts(serverUsers[int.Parse(protocolDatas[ReqContacts.UserID])].UserContacts) + "<EOF>";
+                                                            incomingProtocolClient = XmlAssembler.Contacts(serverUsers[int.Parse(protocolDatas[ReqContacts.UserID])].UserContacts) + EOF.ProtocolString;
                                                             Console.WriteLine($"Contact Requested From -> {tempUser.UserID}");
                                                         }
                                                         else
@@ -175,7 +175,7 @@ namespace ChatServer_Scardi
                                                         if (!User.VerifyContactIsNotSameUser(serverUsers[int.Parse(protocolDatas[NewContact.UserID])], new Contact(protocolDatas[NewContact.UserContactName])))
                                                         {
                                                             serverUsers[int.Parse(protocolDatas[NewContact.UserID])].AddContact(new Contact(protocolDatas[NewContact.UserContactName]));
-                                                            incomingProtocolClient = "<OK><EOF>"; //"Contatto Aggiunto all utente Selezionato"
+                                                            incomingProtocolClient = $"{EOF.ProtocolString}{EOF.ProtocolString}"; //"Contatto Aggiunto all utente Selezionato"
                                                             Console.WriteLine($"New Contact Added -> {protocolDatas[NewContact.UserContactName]} To -> {tempUser.UserID}");
                                                         }
                                                         else
@@ -207,7 +207,7 @@ namespace ChatServer_Scardi
                                                                 //    Console.WriteLine($"  {message}");
                                                                 //}
                                                                 //Console.WriteLine("Fine Messaggi.");
-                                                                incomingProtocolClient = XmlAssembler.Messages(serverUsers[int.Parse(protocolDatas[LoadContact.UserID])].UserContacts[int.Parse(protocolDatas[LoadContact.ContactID])]) + "<EOF>";
+                                                                incomingProtocolClient = XmlAssembler.Messages(serverUsers[int.Parse(protocolDatas[LoadContact.UserID])].UserContacts[int.Parse(protocolDatas[LoadContact.ContactID])]) + EOF.ProtocolString;
                                                                 Console.WriteLine($"Contact Loaded -> {protocolDatas[LoadContact.ContactID]} From User -> {tempUser.UserID}");
                                                             }
                                                             else
@@ -243,7 +243,7 @@ namespace ChatServer_Scardi
                                                                 //    Console.WriteLine($"  {message}");
                                                                 //}
                                                                 //Console.WriteLine("Fine Nuovi Messaggi.");
-                                                                incomingProtocolClient = XmlAssembler.Messages(serverUsers[int.Parse(protocolDatas[ReqNewMsg.UserID])].UserContacts[int.Parse(protocolDatas[ReqNewMsg.ContactID])].GetMessagesFromDT(serverUsers[int.Parse(protocolDatas[ReqNewMsg.UserID])], DateTime.Parse(protocolDatas[ReqNewMsg.DTLastMessageReceived]))) + "<EOF>";
+                                                                incomingProtocolClient = XmlAssembler.Messages(serverUsers[int.Parse(protocolDatas[ReqNewMsg.UserID])].UserContacts[int.Parse(protocolDatas[ReqNewMsg.ContactID])].GetMessagesFromDT(serverUsers[int.Parse(protocolDatas[ReqNewMsg.UserID])], DateTime.Parse(protocolDatas[ReqNewMsg.DTLastMessageReceived]))) + EOF.ProtocolString;
                                                                 Console.WriteLine($"New Messages Loaded of Contact -> {protocolDatas[ReqNewMsg.ContactID]} From User -> {tempUser.UserID}");
                                                             }
                                                             else
@@ -273,7 +273,7 @@ namespace ChatServer_Scardi
                                                             bool inputDateTime = true; //COSTANTE DI DEBUG
                                                             Message msgToSend = inputDateTime ? new Message(serverUsers[tempUser.UserID], serverUsers[tempUser.UserID].UserContacts[int.Parse(protocolDatas[SndMsg.ContactIDReceiver])], DateTime.Parse(protocolDatas[SndMsg.MessageDateTime]), protocolDatas[SndMsg.MessageText]) : new Message(serverUsers[tempUser.UserID], serverUsers[tempUser.UserID].UserContacts[int.Parse(protocolDatas[SndMsg.ContactIDReceiver])], protocolDatas[SndMsg.MessageText]);
                                                             serverUsers[tempUser.UserID].UserContacts[int.Parse(protocolDatas[SndMsg.ContactIDReceiver])].SendNewMsg(serverUsers[tempUser.UserID], msgToSend);
-                                                            incomingProtocolClient = "<OK><EOF>"; //"Messaggio Inviato"
+                                                            incomingProtocolClient = $"{OK.ProtocolString}{EOF.ProtocolString}"; //"Messaggio Inviato"
                                                             Console.WriteLine($"New Message Send To -> {protocolDatas[SndMsg.ContactIDReceiver]} From User -> {tempUser.UserID}");
                                                         }
                                                         else
@@ -289,7 +289,7 @@ namespace ChatServer_Scardi
                                             break;
                                         case ProtocolsType.TestConn:
                                             {
-                                                incomingProtocolClient = $"{protocolDatas[TestConn.IPAddress]}<EOF>";
+                                                incomingProtocolClient = $"{protocolDatas[TestConn.IPAddress] + EOF.ProtocolString}";
                                             }
                                             break;
                                         default:
@@ -302,7 +302,7 @@ namespace ChatServer_Scardi
                                 }
                                 catch (Exception ex)
                                 {
-                                    incomingProtocolClient = ex.Message;
+                                    incomingProtocolClient = ex.Message + EOF.ProtocolString;
                                     Console.WriteLine(ex.Message);
                                 }
 
@@ -315,7 +315,7 @@ namespace ChatServer_Scardi
                             else
                             {
                                 incomingProtocolClient = ErrorType.ToString(ErrorsType.CommandNotRecognized);
-                                Console.WriteLine(ErrorType.ToString(ErrorsType.CommandNotRecognized));
+                                Console.WriteLine($"Response Send To Client -> {ErrorType.ToString(ErrorsType.CommandNotRecognized)}");
                             }
 
                         }

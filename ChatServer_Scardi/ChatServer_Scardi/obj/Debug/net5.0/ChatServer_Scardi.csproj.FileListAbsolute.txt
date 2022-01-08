@@ -94,7 +94,6 @@ C:\Users\Utente\Desktop\ChatServer_Scardi\ChatServer_Scardi\obj\Debug\net5.0\ref
 C:\Users\Utente\Desktop\ChatServer_Scardi\ChatServer_Scardi\obj\Debug\net5.0\ChatServer_Scardi.pdb
 C:\Users\Utente\Desktop\ChatServer_Scardi\ChatServer_Scardi\obj\Debug\net5.0\ChatServer_Scardi.genruntimeconfig.cache
 C:\Users\Utente\Desktop\ChatServer_Scardi\ChatServer_Scardi\obj\Debug\net5.0\ChatServer_Scardi.csproj.CopyComplete
-C:\Users\Tommaso\Documents\GitHub\SocketChatS\ChatServer_Scardi\ChatServer_Scardi\bin\Debug\net5.0\ServerDB.db
 C:\Users\Tommaso\Documents\GitHub\SocketChatS\ChatServer_Scardi\ChatServer_Scardi\bin\Debug\net5.0\ChatServer_Scardi.exe
 C:\Users\Tommaso\Documents\GitHub\SocketChatS\ChatServer_Scardi\ChatServer_Scardi\bin\Debug\net5.0\ChatServer_Scardi.dll.config
 C:\Users\Tommaso\Documents\GitHub\SocketChatS\ChatServer_Scardi\ChatServer_Scardi\bin\Debug\net5.0\ChatServer_Scardi.deps.json
