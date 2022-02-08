@@ -115,8 +115,9 @@ namespace ChatServer_Scardi
                                                 tempUser = User.Exist(int.Parse(protocolDatas[DeAuth.UserID]));//VERIFICA SE L'UTENTE ESISTE NEL DB
                                                 if (tempUser is not null)//VERIFICA SE L'UTENTE ESISTE NEL DB
                                                 {
-                                                    //Se l'utente esiste verifico se si è gia autenticato
-                                                    if (serverUsers.ContainsKey(tempUser.UserID) && String.Equals(clientIp.ToString(), tempUser.UserIpAddress.ToString()))
+                                                    // PROVOCA ERRORE NEL CASO DI PIU SCHEDE DI RETE
+                                                    //if (serverUsers.ContainsKey(tempUser.UserID) && String.Equals(clientIp.ToString(), tempUser.UserIpAddress.ToString()))
+                                                    if (serverUsers.ContainsKey(tempUser.UserID))
                                                     {
                                                         serverUsers.Remove(int.Parse(protocolDatas[DeAuth.UserID]));
                                                         incomingProtocolClient = $"{OK.ProtocolString}{EOF.ProtocolString}"; //Utente deAutenticato con successo, invio la conferma trasmettendo il suo ID negativo
@@ -140,7 +141,9 @@ namespace ChatServer_Scardi
                                                 tempUser = User.Exist(int.Parse(protocolDatas[ReqContacts.UserID]));//VERIFICA SE L'UTENTE ESISTE NEL DB
                                                 if (tempUser is not null)//VERIFICA SE L'UTENTE ESISTE NEL DB
                                                 {
-                                                    if (serverUsers.ContainsKey(tempUser.UserID) && String.Equals(clientIp.ToString(), tempUser.UserIpAddress.ToString()))
+                                                    // PROVOCA ERRORE NEL CASO DI PIU SCHEDE DI RETE
+                                                    //if (serverUsers.ContainsKey(tempUser.UserID) && String.Equals(clientIp.ToString(), tempUser.UserIpAddress.ToString()))
+                                                    if (serverUsers.ContainsKey(tempUser.UserID))
                                                     {
                                                         if (serverUsers[int.Parse(protocolDatas[ReqContacts.UserID])].UserContacts.GetContact is not null)
                                                         {
@@ -170,7 +173,9 @@ namespace ChatServer_Scardi
                                                 tempUser = User.Exist(int.Parse(protocolDatas[NewContact.UserID]));//VERIFICA SE L'UTENTE ESISTE NEL DB
                                                 if (tempUser is not null)//VERIFICA SE L'UTENTE ESISTE NEL DB
                                                 {
-                                                    if (serverUsers.ContainsKey(tempUser.UserID) && String.Equals(clientIp.ToString(), tempUser.UserIpAddress.ToString()))
+                                                    // PROVOCA ERRORE NEL CASO DI PIU SCHEDE DI RETE
+                                                    //if (serverUsers.ContainsKey(tempUser.UserID) && String.Equals(clientIp.ToString(), tempUser.UserIpAddress.ToString()))
+                                                    if (serverUsers.ContainsKey(tempUser.UserID))
                                                     {
                                                         if (!User.VerifyContactIsNotSameUser(serverUsers[int.Parse(protocolDatas[NewContact.UserID])], new Contact(protocolDatas[NewContact.UserContactName])))
                                                         {
@@ -194,7 +199,9 @@ namespace ChatServer_Scardi
                                                 tempUser = User.Exist(int.Parse(protocolDatas[LoadContact.UserID]));//VERIFICA SE L'UTENTE ESISTE NEL DB
                                                 if (tempUser is not null)//VERIFICA SE L'UTENTE ESISTE NEL DB
                                                 {
-                                                    if (serverUsers.ContainsKey(tempUser.UserID) && String.Equals(clientIp.ToString(), tempUser.UserIpAddress.ToString()))
+                                                    // PROVOCA ERRORE NEL CASO DI PIU SCHEDE DI RETE
+                                                    //if (serverUsers.ContainsKey(tempUser.UserID) && String.Equals(clientIp.ToString(), tempUser.UserIpAddress.ToString()))
+                                                    if (serverUsers.ContainsKey(tempUser.UserID))
                                                     {
                                                         if (User.ContactUserExist(serverUsers[tempUser.UserID], serverUsers[tempUser.UserID].UserContacts[int.Parse(protocolDatas[LoadContact.ContactID])]))
                                                         {
@@ -230,7 +237,9 @@ namespace ChatServer_Scardi
                                                 tempUser = User.Exist(int.Parse(protocolDatas[ReqNewMsg.UserID]));//VERIFICA SE L'UTENTE ESISTE NEL DB
                                                 if (tempUser is not null)//VERIFICA SE L'UTENTE ESISTE NEL DB
                                                 {
-                                                    if (serverUsers.ContainsKey(tempUser.UserID) && String.Equals(clientIp.ToString(), tempUser.UserIpAddress.ToString()))
+                                                    // PROVOCA ERRORE NEL CASO DI PIU SCHEDE DI RETE
+                                                    //if (serverUsers.ContainsKey(tempUser.UserID) && String.Equals(clientIp.ToString(), tempUser.UserIpAddress.ToString()))
+                                                    if (serverUsers.ContainsKey(tempUser.UserID))
                                                     {
                                                         if (User.ContactUserExist(serverUsers[tempUser.UserID], serverUsers[tempUser.UserID].UserContacts[int.Parse(protocolDatas[LoadContact.ContactID])]))
                                                         {
@@ -265,7 +274,9 @@ namespace ChatServer_Scardi
                                                 tempUser = User.Exist(int.Parse(protocolDatas[SndMsg.UserID]));//VERIFICA SE L'UTENTE ESISTE NEL DB
                                                 if (tempUser is not null)//VERIFICA SE L'UTENTE ESISTE NEL DB
                                                 {
-                                                    if (serverUsers.ContainsKey(tempUser.UserID) && String.Equals(clientIp.ToString(), tempUser.UserIpAddress.ToString()))
+                                                    // PROVOCA ERRORE NEL CASO DI PIU SCHEDE DI RETE
+                                                    //if (serverUsers.ContainsKey(tempUser.UserID) && String.Equals(clientIp.ToString(), tempUser.UserIpAddress.ToString()))
+                                                    if (serverUsers.ContainsKey(tempUser.UserID))
                                                     {
                                                         if (User.ContactUserExist(serverUsers[tempUser.UserID], serverUsers[tempUser.UserID].UserContacts[int.Parse(protocolDatas[SndMsg.ContactIDReceiver])]))
                                                         {
