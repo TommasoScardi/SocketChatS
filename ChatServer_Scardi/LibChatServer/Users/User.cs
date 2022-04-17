@@ -68,12 +68,12 @@ namespace LibChatServer
         }
 
 
-        internal User(int userID, string userName, string userPwd, IPAddress userIpAddress)
+        internal User(long UsersID, string UsersName, string UsersPwd, string UsersIP)
         {
-            _userID = userID;
-            _userName = userName;
-            _userPwd = userPwd;
-            _userIpAddress = userIpAddress;
+            _userID = (int)UsersID;
+            _userName = UsersName;
+            _userPwd = UsersPwd;
+            _userIpAddress = IPAddress.Parse(UsersIP);
         }
 
         private void UpdateContacts()

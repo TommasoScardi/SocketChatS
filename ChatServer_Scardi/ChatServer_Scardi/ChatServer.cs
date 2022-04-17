@@ -281,8 +281,12 @@ namespace ChatServer_Scardi
                                                         if (User.ContactUserExist(serverUsers[tempUser.UserID], serverUsers[tempUser.UserID].UserContacts[int.Parse(protocolDatas[SndMsg.ContactIDReceiver])]))
                                                         {
                                                             //Simulazione dell invio tramite XML dei contatti dell utente che li richiede
-                                                            bool inputDateTime = true; //COSTANTE DI DEBUG
-                                                            Message msgToSend = inputDateTime ? new Message(serverUsers[tempUser.UserID], serverUsers[tempUser.UserID].UserContacts[int.Parse(protocolDatas[SndMsg.ContactIDReceiver])], DateTime.Parse(protocolDatas[SndMsg.MessageDateTime]), protocolDatas[SndMsg.MessageText]) : new Message(serverUsers[tempUser.UserID], serverUsers[tempUser.UserID].UserContacts[int.Parse(protocolDatas[SndMsg.ContactIDReceiver])], protocolDatas[SndMsg.MessageText]);
+                                                            Message msgToSend;
+#if DEBUG
+                                                            msgToSend = new Message(serverUsers[tempUser.UserID], serverUsers[tempUser.UserID].UserContacts[int.Parse(protocolDatas[SndMsg.ContactIDReceiver])], DateTime.Parse(protocolDatas[SndMsg.MessageDateTime]), protocolDatas[SndMsg.MessageText]);
+#else
+                                                            msgToSend = new Message(serverUsers[tempUser.UserID], serverUsers[tempUser.UserID].UserContacts[int.Parse(protocolDatas[SndMsg.ContactIDReceiver])], protocolDatas[SndMsg.MessageText]);
+#endif
                                                             serverUsers[tempUser.UserID].UserContacts[int.Parse(protocolDatas[SndMsg.ContactIDReceiver])].SendNewMsg(serverUsers[tempUser.UserID], msgToSend);
                                                             incomingProtocolClient = $"{OK.ProtocolString}{EOF.ProtocolString}"; //"Messaggio Inviato"
                                                             Console.WriteLine($"New Message Send To -> {protocolDatas[SndMsg.ContactIDReceiver]} From User -> {tempUser.UserID}");

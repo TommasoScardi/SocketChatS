@@ -20,3 +20,4 @@ C:\Users\Tommaso\Documents\GitHub\SocketChatS\ChatClient_Scardi\ChatClient_Scard
 C:\Users\Tommaso\Documents\GitHub\SocketChatS\ChatClient_Scardi\ChatClient_Scardi\obj\Debug\ChatClient_Scardi.csproj.CoreCompileInputs.cache
 C:\Users\Tommaso\Documents\GitHub\SocketChatS\ChatClient_Scardi\ChatClient_Scardi\obj\Debug\ChatClient_Scardi.exe
 C:\Users\Tommaso\Documents\GitHub\SocketChatS\ChatClient_Scardi\ChatClient_Scardi\obj\Debug\ChatClient_Scardi.pdb
+C:\Users\Tommaso\Documents\GitHub\SocketChatS\ChatClient_Scardi\ChatClient_Scardi\obj\Debug\ChatClient_Scardi.csproj.SuggestedBindingRedirects.cache

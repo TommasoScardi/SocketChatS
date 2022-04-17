@@ -100,7 +100,6 @@ C:\Users\Tommaso\Documents\GitHub\SocketChatS\ChatServer_Scardi\ChatServer_Scard
 C:\Users\Tommaso\Documents\GitHub\SocketChatS\ChatServer_Scardi\ChatServer_Scardi\bin\Debug\net5.0\ChatServer_Scardi.runtimeconfig.json
 C:\Users\Tommaso\Documents\GitHub\SocketChatS\ChatServer_Scardi\ChatServer_Scardi\bin\Debug\net5.0\ChatServer_Scardi.runtimeconfig.dev.json
 C:\Users\Tommaso\Documents\GitHub\SocketChatS\ChatServer_Scardi\ChatServer_Scardi\bin\Debug\net5.0\ChatServer_Scardi.dll
-C:\Users\Tommaso\Documents\GitHub\SocketChatS\ChatServer_Scardi\ChatServer_Scardi\bin\Debug\net5.0\ref\ChatServer_Scardi.dll
 C:\Users\Tommaso\Documents\GitHub\SocketChatS\ChatServer_Scardi\ChatServer_Scardi\bin\Debug\net5.0\ChatServer_Scardi.pdb
 C:\Users\Tommaso\Documents\GitHub\SocketChatS\ChatServer_Scardi\ChatServer_Scardi\bin\Debug\net5.0\Dapper.dll
 C:\Users\Tommaso\Documents\GitHub\SocketChatS\ChatServer_Scardi\ChatServer_Scardi\bin\Debug\net5.0\EntityFramework.SqlServer.dll
@@ -188,3 +187,4 @@ C:\Users\Utente\Documents\GitHub\SocketChatS\ChatServer_Scardi\ChatServer_Scardi
 C:\Users\Utente\Documents\GitHub\SocketChatS\ChatServer_Scardi\ChatServer_Scardi\obj\Debug\net5.0\ref\ChatServer_Scardi.dll
 C:\Users\Utente\Documents\GitHub\SocketChatS\ChatServer_Scardi\ChatServer_Scardi\obj\Debug\net5.0\ChatServer_Scardi.pdb
 C:\Users\Utente\Documents\GitHub\SocketChatS\ChatServer_Scardi\ChatServer_Scardi\obj\Debug\net5.0\ChatServer_Scardi.genruntimeconfig.cache
+C:\Users\Tommaso\Documents\GitHub\SocketChatS\ChatServer_Scardi\ChatServer_Scardi\obj\Debug\net5.0\refint\ChatServer_Scardi.dll

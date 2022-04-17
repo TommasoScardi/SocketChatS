@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LibChatClient.Protocol;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -10,7 +11,7 @@ using System.Windows.Forms;
 
 namespace LibChatClient.Connections
 {
-    internal class Connection
+    public class Connection
     {
         internal static string SendReceiveFromServer(IPAddress IpServer, string strToSend)
         {
@@ -71,10 +72,10 @@ namespace LibChatClient.Connections
             return null;
         }
 
-        internal static bool VerifyIpAddress(IPAddress iPAddressToVerify)
+        public static bool VerifyIpAddress(IPAddress iPAddressToVerify)
         {
             if (iPAddressToVerify is null)
-                throw new ArgumentNullException("iPAddressToVerify", "L'IP Fornito era null");
+                throw new ArgumentNullException(nameof(iPAddressToVerify), "L'IP Fornito era null");
 
             Ping verifyIP = new Ping();
             int timeout = 120;
@@ -87,7 +88,7 @@ namespace LibChatClient.Connections
                 return false;
         }
 
-        internal static IPAddress GetIPAddress()
+        public static IPAddress GetIPAddress()
         {
             IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
             foreach (IPAddress iPAddress in ipHostInfo.AddressList)
@@ -103,6 +104,22 @@ namespace LibChatClient.Connections
                     continue;
             }
             return null;
+        }
+
+        public static IPStatus VerifyConnectionToServer(IPAddress serverIP)
+        {
+            Ping testIP = new Ping();
+            PingReply resTestIP = testIP.Send(serverIP);
+
+            if (resTestIP.Status == IPStatus.Success)
+            {
+                if (Protocols.RemoveTerminator(SendReceiveFromServer(serverIP, $"{TestConn.ProtocolString}{serverIP}{EOF.ProtocolString}")) == serverIP.ToString())
+                    return IPStatus.Success;
+                else
+                    return IPStatus.BadDestination;
+            }
+            else
+                return resTestIP.Status;
         }
     }
 }

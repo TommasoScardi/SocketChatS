@@ -1,7 +1,9 @@
-﻿#pragma warning disable CS0162 // È stato rilevato codice non raggiungibile
-using System;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SQLite;
+using Dapper;
 using System.Configuration;
 using System.Net;
 
@@ -37,9 +39,9 @@ namespace LibChatServer
         /// </summary>
         /// <param name="id">Nome Nel App.config dell attributo id nel tag XML StringCoonnections</param>
         /// <returns>La Stringa di connessione al DB</returns>
-        private static string LoadConnectionString(string id = "Default")
+        private static string LoadConnectionString()
         {
-            return ConfigurationManager.ConnectionStrings[id].ConnectionString;
+            return ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["ConnStrDB"].ToString()].ConnectionString;
         }
 
         /// <summary>
@@ -52,24 +54,15 @@ namespace LibChatServer
             if (user is null)
                 return false;
 
-            using (SQLiteConnection dbConn = new SQLiteConnection(LoadConnectionString()))
+            string dbQuery = "SELECT * FROM Users WHERE UsersID = @UserID AND UsersName = @UserName AND UsersPwd = @UserPwd; ";
+            using IDbConnection dbConn = new SQLiteConnection(LoadConnectionString());
+            try
             {
-                dbConn.Open();
-
-                using (SQLiteCommand dbCmd = new SQLiteCommand(dbConn))
-                {
-                    //Lettura di dei Record da una tabella secondo le condizioni specificate
-                    string sql = "SELECT * FROM Users WHERE UsersID = @userID AND UsersName = @userName AND UsersPwd = @userPwd";
-                    dbCmd.CommandText = sql;
-                    dbCmd.Parameters.AddWithValue("userID", user.UserID);
-                    dbCmd.Parameters.AddWithValue("userName", user.UserName);
-                    dbCmd.Parameters.AddWithValue("userPwd", user.UserPwd);
-                    using (SQLiteDataReader queryRes = dbCmd.ExecuteReader())
-                    {
-                        return queryRes.HasRows;
-                    }
-                }
-                dbConn.Close();
+                return dbConn.Query<User>(dbQuery, user).AsList().Count > 0;
+            }
+            catch (InvalidOperationException)
+            {
+                return false;
             }
         }
 
@@ -83,30 +76,17 @@ namespace LibChatServer
             if (userID <= 0)
                 return null;
 
-            using (SQLiteConnection dbConn = new SQLiteConnection(LoadConnectionString()))
+            string dbQuery = "SELECT * FROM Users WHERE UsersID = @UserID; ";
+            using IDbConnection dbConn = new SQLiteConnection(LoadConnectionString());
+            try
             {
-                dbConn.Open();
-
-                using (SQLiteCommand dbCmd = new SQLiteCommand(dbConn))
-                {
-                    //Lettura di dei Record da una tabella secondo le condizioni specificate
-                    string sql = "SELECT * FROM Users WHERE UsersID = @userID";
-                    dbCmd.CommandText = sql;
-                    dbCmd.Parameters.AddWithValue("userID", userID);
-                    using (SQLiteDataReader queryRes = dbCmd.ExecuteReader())
-                    {
-                        if (queryRes.HasRows)
-                        {
-                            queryRes.Read();
-                            return new User(int.Parse(queryRes["UsersID"].ToString()), queryRes["UsersName"].ToString(), queryRes["UsersPwd"].ToString(), IPAddress.Parse(queryRes["UsersIP"].ToString()));
-                        }
-                        else
-                            return null;
-                    }
-                }
-
-                dbConn.Close();
+                return dbConn.QuerySingle<User>(dbQuery, new { @UserID = userID });
             }
+            catch(InvalidOperationException)
+            {
+                return null;
+            }
+
         }
 
         /// <summary>
@@ -119,31 +99,15 @@ namespace LibChatServer
             if (userName is null)
                 return null;
 
-            using (SQLiteConnection dbConn = new SQLiteConnection(LoadConnectionString()))
+            string dbQuery = "SELECT * FROM Users WHERE UsersName = @UserName; ";
+            using IDbConnection dbConn = new SQLiteConnection(LoadConnectionString());
+            try
             {
-                dbConn.Open();
-
-                using (SQLiteCommand dbCmd = new SQLiteCommand(dbConn))
-                {
-                    //Lettura di dei Record da una tabella secondo le condizioni specificate
-                    string sql = "SELECT * FROM Users WHERE UsersName = @userName";
-                    dbCmd.CommandText = sql;
-                    dbCmd.Parameters.AddWithValue("userName", userName);
-                    using (SQLiteDataReader queryRes = dbCmd.ExecuteReader())
-                    {
-                        if (queryRes.HasRows)
-                        {
-                            queryRes.Read();
-                            return new User(int.Parse(queryRes["UsersID"].ToString()), queryRes["UsersName"].ToString(), queryRes["UsersPwd"].ToString(), IPAddress.Parse(queryRes["UsersIP"].ToString()));
-                        }
-                        else
-                        {
-                            return null;
-                        }
-                    }
-                }
-
-                dbConn.Close();
+                return dbConn.QuerySingle<User>(dbQuery, new { @UserName = userName });
+            }
+            catch(InvalidOperationException)
+            {
+                return null;
             }
         }
 
@@ -157,32 +121,9 @@ namespace LibChatServer
             if (userIP is null)
                 return null;
 
-            using (SQLiteConnection dbConn = new SQLiteConnection(LoadConnectionString()))
-            {
-                dbConn.Open();
-
-                using (SQLiteCommand dbCmd = new SQLiteCommand(dbConn))
-                {
-                    //Lettura di dei Record da una tabella secondo le condizioni specificate
-                    string sql = "SELECT * FROM Users WHERE UsersIP = @userIP";
-                    dbCmd.CommandText = sql;
-                    dbCmd.Parameters.AddWithValue("userIP", userIP.ToString());
-                    using (SQLiteDataReader queryRes = dbCmd.ExecuteReader())
-                    {
-                        if (queryRes.HasRows)
-                        {
-                            queryRes.Read();
-                            return new User(int.Parse(queryRes["UsersID"].ToString()), queryRes["UsersName"].ToString(), queryRes["UsersPwd"].ToString(), IPAddress.Parse(queryRes["UsersIP"].ToString()));
-                        }
-                        else
-                        {
-                            return null;
-                        }
-                    }
-                }
-
-                dbConn.Close();
-            }
+            string dbQuery = "SELECT * FROM Users WHERE UsersIP = @UserIP; ";
+            using IDbConnection dbConn = new SQLiteConnection(LoadConnectionString());
+            return dbConn.QuerySingle<User>(dbQuery, new { @UserIP = userIP.ToString() });
         }
 
         /// <summary>
@@ -196,32 +137,15 @@ namespace LibChatServer
             if (userID <= 0 || userName is null)
                 return null;
 
-            using (SQLiteConnection dbConn = new SQLiteConnection(LoadConnectionString()))
+            string dbQuery = "SELECT * FROM Users WHERE UsersID = @UserID AND UsersName = @UserName; ";
+            using IDbConnection dbConn = new SQLiteConnection(LoadConnectionString());
+            try
             {
-                dbConn.Open();
-
-                using (SQLiteCommand dbCmd = new SQLiteCommand(dbConn))
-                {
-                    //Lettura di dei Record da una tabella secondo le condizioni specificate
-                    string sql = "SELECT * FROM Users WHERE UsersID = @userID AND UsersName = @userName";
-                    dbCmd.CommandText = sql;
-                    dbCmd.Parameters.AddWithValue("userID", userID);
-                    dbCmd.Parameters.AddWithValue("userName", userName);
-                    using (SQLiteDataReader queryRes = dbCmd.ExecuteReader())
-                    {
-                        if (queryRes.HasRows)
-                        {
-                            queryRes.Read();
-                            return new User(int.Parse(queryRes["UsersID"].ToString()), queryRes["UsersName"].ToString(), queryRes["UsersPwd"].ToString(), IPAddress.Parse(queryRes["UsersIP"].ToString()));
-                        }
-                        else
-                        {
-                            return null;
-                        }
-                    }
-                }
-
-                dbConn.Close();
+                return dbConn.QuerySingle<User>(dbQuery, new { @UserID = userID, @UserName = userName });
+            }
+            catch (InvalidOperationException)
+            {
+                return null;
             }
         }
 
@@ -236,32 +160,15 @@ namespace LibChatServer
             if (userName is null || userPwd is null)
                 return null;
 
-            using (SQLiteConnection dbConn = new SQLiteConnection(LoadConnectionString()))
+            string dbQuery = "SELECT * FROM Users WHERE UsersName = @UserName AND UsersPwd = @UserPwd; ";
+            using IDbConnection dbConn = new SQLiteConnection(LoadConnectionString());
+            try
             {
-                dbConn.Open();
-
-                using (SQLiteCommand dbCmd = new SQLiteCommand(dbConn))
-                {
-                    //Lettura di dei Record da una tabella secondo le condizioni specificate
-                    string sql = "SELECT * FROM Users WHERE UsersName = @userName AND UsersPwd = @userPwd";
-                    dbCmd.CommandText = sql;
-                    dbCmd.Parameters.AddWithValue("userName", userName);
-                    dbCmd.Parameters.AddWithValue("userPwd", userPwd);
-                    using (SQLiteDataReader queryRes = dbCmd.ExecuteReader())
-                    {
-                        if (queryRes.HasRows)
-                        {
-                            queryRes.Read();
-                            return new User(int.Parse(queryRes["UsersID"].ToString()), queryRes["UsersName"].ToString(), queryRes["UsersPwd"].ToString(), IPAddress.Parse(queryRes["UsersIP"].ToString()));
-                        }
-                        else
-                        {
-                            return null;
-                        }
-                    }
-                }
-
-                dbConn.Close();
+                return dbConn.QuerySingle<User>(dbQuery, new { @UserName = userName, @UserPwd = userPwd });
+            }
+            catch (InvalidOperationException)
+            {
+                return null;
             }
         }
 
@@ -276,32 +183,15 @@ namespace LibChatServer
             if (userName is null || userIP is null)
                 return null;
 
-            using (SQLiteConnection dbConn = new SQLiteConnection(LoadConnectionString()))
+            string dbQuery = "SELECT * FROM Users WHERE UsersName = @UserName AND UsersIP = @UserIP; ";
+            using IDbConnection dbConn = new SQLiteConnection(LoadConnectionString());
+            try
             {
-                dbConn.Open();
-
-                using (SQLiteCommand dbCmd = new SQLiteCommand(dbConn))
-                {
-                    //Lettura di dei Record da una tabella secondo le condizioni specificate
-                    string sql = "SELECT * FROM Users WHERE UsersName = @userName AND UsersIP = @userIP";
-                    dbCmd.CommandText = sql;
-                    dbCmd.Parameters.AddWithValue("userName", userName);
-                    dbCmd.Parameters.AddWithValue("userIP", userIP.ToString());
-                    using (SQLiteDataReader queryRes = dbCmd.ExecuteReader())
-                    {
-                        if (queryRes.HasRows)
-                        {
-                            queryRes.Read();
-                            return new User(int.Parse(queryRes["UsersID"].ToString()), queryRes["UsersName"].ToString(), queryRes["UsersPwd"].ToString(), IPAddress.Parse(queryRes["UsersIP"].ToString()));
-                        }
-                        else
-                        {
-                            return null;
-                        }
-                    }
-                }
-
-                dbConn.Close();
+                return dbConn.QuerySingle<User>(dbQuery, new { @UserName = userName, @UserIP = userIP.ToString() });
+            }
+            catch (InvalidOperationException)
+            {
+                return null;
             }
         }
 
@@ -317,33 +207,15 @@ namespace LibChatServer
             if (userID <= 0 || userName is null || userIP is null)
                 return null;
 
-            using (SQLiteConnection dbConn = new SQLiteConnection(LoadConnectionString()))
+            string dbQuery = "SELECT * FROM Users WHERE UsersID = @UserID AND UsersName = @UserName AND UsersIP = @UserIP; ";
+            using IDbConnection dbConn = new SQLiteConnection(LoadConnectionString());
+            try
             {
-                dbConn.Open();
-
-                using (SQLiteCommand dbCmd = new SQLiteCommand(dbConn))
-                {
-                    //Lettura di dei Record da una tabella secondo le condizioni specificate
-                    string sql = "SELECT * FROM Users WHERE UsersID = @userID AND UsersName = @userName AND UsersIP = @userIP";
-                    dbCmd.CommandText = sql;
-                    dbCmd.Parameters.AddWithValue("userID", userID);
-                    dbCmd.Parameters.AddWithValue("userName", userName);
-                    dbCmd.Parameters.AddWithValue("userIP", userIP.ToString());
-                    using (SQLiteDataReader queryRes = dbCmd.ExecuteReader())
-                    {
-                        if (queryRes.HasRows)
-                        {
-                            queryRes.Read();
-                            return new User(int.Parse(queryRes["UsersID"].ToString()), queryRes["UsersName"].ToString(), queryRes["UsersPwd"].ToString(), IPAddress.Parse(queryRes["UsersIP"].ToString()));
-                        }
-                        else
-                        {
-                            return null;
-                        }
-                    }
-                }
-
-                dbConn.Close();
+                return dbConn.QuerySingle<User>(dbQuery, new { @UserID = userID, @UserName = userName, @UserIP = userIP.ToString() });
+            }
+            catch (InvalidOperationException)
+            {
+                return null;
             }
         }
 
@@ -358,25 +230,9 @@ namespace LibChatServer
             if (userID <= 0 || userIP is null)
                 return false;
 
-            using (SQLiteConnection dbConn = new SQLiteConnection(LoadConnectionString()))
-            {
-                dbConn.Open();
-
-                using (SQLiteCommand dbCmd = new SQLiteCommand(dbConn))
-                {
-                    string sql = "UPDATE Users SET UsersIP = @userIP WHERE UsersID = @userID;";
-                    dbCmd.CommandText = sql;
-                    dbCmd.Parameters.AddWithValue("userIP", userIP.ToString());
-                    dbCmd.Parameters.AddWithValue("userID", userID);
-                    if (dbCmd.ExecuteNonQuery() <= 0)
-                        //throw new Exception("Inable to Update the IP of the user selected");
-                        return false;
-
-                }
-
-                dbConn.Close();
-                return true;
-            }
+            string dbQuery = "UPDATE Users SET UsersIP = @UserIP WHERE UsersID = @UserID; ";
+            using IDbConnection dbConn = new SQLiteConnection(LoadConnectionString());
+            return dbConn.Execute(dbQuery, new { @UserID = userID, @UserIP = userIP.ToString() }) > 0;
         }
 
         /// <summary>
@@ -418,49 +274,26 @@ namespace LibChatServer
         {
             if (userName is null || userPwd is null || userIP is null)
                 return false;
+            else if (UserExist(userName, userPwd) == null)
+                return false;
 
-            using (SQLiteConnection dbConn = new SQLiteConnection(LoadConnectionString()))
+            string dbQuery = "INSERT INTO Users ('UsersName', 'UsersPwd', 'UsersIP') VALUES (@UserName, @UserPwd, @UserIp); ";
+            using IDbConnection dbConn = new SQLiteConnection(LoadConnectionString());
+            if (dbConn.Execute(dbQuery, new { @UserName = userName, @UserPwd = userPwd, @UserIp = userIP.ToString() }) <= 0)
+                return false;
+
+            int userID;
+            dbQuery = "SELECT UsersID FROM Users WHERE UsersName = @UserName; ";
+            try
             {
-                dbConn.Open();
+                userID = dbConn.QuerySingle<int>(dbQuery, new { @UserName = userName });
+            }
+            catch (InvalidOperationException)
+            {
+                return false;
+            }
 
-                using (SQLiteCommand dbCmd = new SQLiteCommand(dbConn))
-                {
-                    //Lettura di dei Record da una tabella secondo le condizioni specificate
-                    string sql = "SELECT * FROM Users WHERE UsersName = @userName AND UsersIP = @userIP";
-                    dbCmd.CommandText = sql;
-                    dbCmd.Parameters.AddWithValue("userName", userName);
-                    dbCmd.Parameters.AddWithValue("userIP", userIP.ToString());
-                    using (SQLiteDataReader queryRes = dbCmd.ExecuteReader())
-                    {
-                        if (queryRes.HasRows)
-                            //throw new SQLiteException(SQLiteErrorCode.Row, $"An user already exist with the given username: {userName}");
-                            return false;
-                    }
-
-                    sql = @"INSERT INTO Users ('UsersName', 'UsersPwd', 'UsersIP') VALUES (@userName, @userPwd, @userIp);";
-                    dbCmd.CommandText = sql;
-                    dbCmd.Parameters.AddWithValue("userName", userName);
-                    dbCmd.Parameters.AddWithValue("userPwd", userPwd);
-                    dbCmd.Parameters.AddWithValue("userIp", userIP.ToString());
-
-                    if (dbCmd.ExecuteNonQuery() <= 0)
-                        //throw new SQLiteException(SQLiteErrorCode.IoErr_Write, $"Error while creating a new user: {userName}");
-                        return false;
-
-                    sql = @"SELECT UsersID FROM Users WHERE UsersName = @userName";
-                    dbCmd.CommandText = sql;
-                    dbCmd.Parameters.AddWithValue("userName", userName);
-                    int userID;
-                    using (SQLiteDataReader queryRes = dbCmd.ExecuteReader())
-                    {
-                        if (!queryRes.HasRows)
-                            //throw new SQLiteException(SQLiteErrorCode.IoErr_Read, $"Unable to find id of the given username: {userName}");
-                            return false;
-                        queryRes.Read();
-                        userID = int.Parse(queryRes[0].ToString());
-                    }
-
-                    sql = @$"CREATE TABLE ""Contacts-{userID}"" (
+            dbQuery = @$"CREATE TABLE ""Contacts-{userID}"" (
                             ""ContactsID""    INTEGER NOT NULL UNIQUE,
                             ""ContactsUserID""    INTEGER NOT NULL UNIQUE,
                             ""ContactsUserName""  TEXT NOT NULL UNIQUE,
@@ -469,16 +302,7 @@ namespace LibChatServer
 	                        FOREIGN KEY(""ContactsUserID"") REFERENCES ""Users""(""UsersID""),
 	                        FOREIGN KEY(""ContactsUserName"") REFERENCES ""Users""(""UsersName"")
                         ); ";
-                    dbCmd.CommandText = sql;
-
-                    if (dbCmd.ExecuteNonQuery() <= 0)
-                        //throw new SQLiteException(SQLiteErrorCode.IoErr_Write, $"Error while creating a new user Contacts Table: {userName}");
-                        return false;
-                    return true;
-                }
-
-                dbConn.Close();
-            }
+            return dbConn.Execute(dbQuery) <= 0;
         }
 
         /// <summary>
@@ -494,24 +318,9 @@ namespace LibChatServer
                 //throw new ArgumentNullException(userID < 0 ? nameof(userID) : nameof(contactUserID), userID < 0 ? "L'utente a cui ci si rifersice per verificare il contatto non puo esistere nel DB dato che ID < 0" : "Il contatto che si sta cercando non puo esistere nel DB dato che ID < 0");
                 return false;
 
-            using (SQLiteConnection dbConn = new SQLiteConnection(LoadConnectionString()))
-            {
-                dbConn.Open();
-
-                using (SQLiteCommand dbCmd = new SQLiteCommand(dbConn))
-                {
-                    string sql = @$"SELECT * FROM 'Contacts-{userID}' WHERE ContactsUserID = @contactsUserID AND ContactsUserName = @contactsUserName;";
-                    dbCmd.CommandText = sql;
-                    dbCmd.Parameters.AddWithValue("contactsUserID", contactUserID);
-                    dbCmd.Parameters.AddWithValue("contactsUserName", contactUserName);
-                    using (SQLiteDataReader queryRes = dbCmd.ExecuteReader())
-                    {
-                        return queryRes.HasRows;
-                    }
-                }
-
-                dbConn.Close();
-            }
+            string dbQuery = $"SELECT * FROM 'Contacts-{userID}' WHERE ContactsUserID = @ContactsUserID AND ContactsUserName = @ContactsUserName;";
+            IDbConnection dbConn = new SQLiteConnection(LoadConnectionString());
+            return dbConn.Query(dbQuery, new { @ContactUserID = contactUserID, @ContactUserName = contactUserName }).AsList().Count > 0;
         }
 
         /// <summary>
@@ -536,8 +345,8 @@ namespace LibChatServer
 
                 using (SQLiteCommand dbCmd = new SQLiteCommand(dbConn))
                 {
-                    string sql = @$"SELECT * FROM 'Contacts-{user.UserID}' WHERE ContactsUserID = @contactsUserID AND ContactsUserName = @contactsUserName";
-                    dbCmd.CommandText = sql;
+                    string dbQuery = @$"SELECT * FROM 'Contacts-{user.UserID}' WHERE ContactsUserID = @contactsUserID AND ContactsUserName = @contactsUserName";
+                    dbCmd.CommandText = dbQuery;
                     dbCmd.Parameters.AddWithValue("contactsUserID", contact.ContactUserID);
                     dbCmd.Parameters.AddWithValue("contactsUserName", contact.ContactUserName);
                     using (SQLiteDataReader queryRes = dbCmd.ExecuteReader())
@@ -570,9 +379,9 @@ namespace LibChatServer
 
                 using (SQLiteCommand dbCmd = new SQLiteCommand(dbConn))
                 {
-                    //string sql = @$"SELECT * FROM 'Contacts-{user.UserID}' ORDER BY ContactsUserID ASC;";
-                    string sql = @$"SELECT * FROM 'Contacts-{user.UserID}';";
-                    dbCmd.CommandText = sql;
+                    //string dbQuery = @$"SELECT * FROM 'Contacts-{user.UserID}' ORDER BY ContactsUserID ASC;";
+                    string dbQuery = @$"SELECT * FROM 'Contacts-{user.UserID}';";
+                    dbCmd.CommandText = dbQuery;
                     using (SQLiteDataReader queryRes = dbCmd.ExecuteReader())
                     {
                         if (!queryRes.HasRows)
@@ -612,8 +421,8 @@ namespace LibChatServer
                 using (SQLiteCommand dbCmd = new SQLiteCommand(dbConn))
                 {
                     //Verifica Esistenza del nuovo contatto
-                    string sql = @$"SELECT * FROM 'Contacts-{user.UserID}' WHERE ContactsUserID = @contactsUserID OR ContactsUserName = @contactsUserName;";
-                    dbCmd.CommandText = sql;
+                    string dbQuery = @$"SELECT * FROM 'Contacts-{user.UserID}' WHERE ContactsUserID = @contactsUserID OR ContactsUserName = @contactsUserName;";
+                    dbCmd.CommandText = dbQuery;
                     dbCmd.Parameters.AddWithValue("contactsUserID", newContact.ContactUserID);
                     dbCmd.Parameters.AddWithValue("contactsUserName", newContact.ContactUserName);
                     using (SQLiteDataReader queryRes = dbCmd.ExecuteReader())
@@ -624,8 +433,8 @@ namespace LibChatServer
                     }
 
                     //Scrittura del nuovo contatto
-                    sql = @$"INSERT INTO 'Contacts-{user.UserID}' (ContactsUserID, ContactsUserName, ContactsAdded) VALUES (@contactUserID, @contactUserName, @contactAdded);";
-                    dbCmd.CommandText = sql;
+                    dbQuery = @$"INSERT INTO 'Contacts-{user.UserID}' (ContactsUserID, ContactsUserName, ContactsAdded) VALUES (@contactUserID, @contactUserName, @contactAdded);";
+                    dbCmd.CommandText = dbQuery;
                     dbCmd.Parameters.AddWithValue("contactUserID", newContact.ContactUserID);
                     dbCmd.Parameters.AddWithValue("contactUserName", newContact.ContactUserName);
                     dbCmd.Parameters.AddWithValue("contactAdded", ParseBoolToInt(true));
@@ -634,8 +443,8 @@ namespace LibChatServer
                         return false;
 
                     //Scrittura del nuovo contatto nella tabella del conttatto aggiunto
-                    sql = @$"INSERT INTO 'Contacts-{newContact.ContactUserID}' (ContactsUserID, ContactsUserName, ContactsAdded) VALUES (@contactUserID, @contactUserName, @contactAdded);";
-                    dbCmd.CommandText = sql;
+                    dbQuery = @$"INSERT INTO 'Contacts-{newContact.ContactUserID}' (ContactsUserID, ContactsUserName, ContactsAdded) VALUES (@contactUserID, @contactUserName, @contactAdded);";
+                    dbCmd.CommandText = dbQuery;
                     dbCmd.Parameters.AddWithValue("contactUserID", user.UserID);
                     dbCmd.Parameters.AddWithValue("contactUserName", user.UserName);
                     dbCmd.Parameters.AddWithValue("contactAdded", ParseBoolToInt(false));
@@ -643,7 +452,7 @@ namespace LibChatServer
                         //throw new SQLiteException(SQLiteErrorCode.IoErr_Write, "Error writing the new Contact to the DB");
                         return false;
 
-                    sql = @$"CREATE TABLE ""Messages-{user.UserID}-{newContact.ContactUserID}""(
+                    dbQuery = @$"CREATE TABLE ""Messages-{user.UserID}-{newContact.ContactUserID}""(
                             ""MessagesID""    INTEGER NOT NULL UNIQUE,
                          ""MessagesUserSenderID""   INTEGER NOT NULL,
                          ""MessagesContactReceiverID""   INTEGER NOT NULL,
@@ -652,7 +461,7 @@ namespace LibChatServer
                          PRIMARY KEY(""MessagesID"" AUTOINCREMENT),
                          FOREIGN KEY(""MessagesContactReceiverID"") REFERENCES ""Contacts-{user.UserID}""(""ContactsUserID"")
                         ); ";
-                    dbCmd.CommandText = sql;
+                    dbCmd.CommandText = dbQuery;
 
                     if (dbCmd.ExecuteNonQuery() <= 0)
                         //throw new SQLiteException(SQLiteErrorCode.IoErr_Write, $"Error while creating a new user Messages Table: {userName}");
@@ -686,8 +495,8 @@ namespace LibChatServer
                 using (SQLiteCommand dbCmd = new SQLiteCommand(dbConn))
                 {
                     string outputEvalContactAdded = contact.ContactsAdded ? $"{user.UserID}-{contact.ContactUserID}" : $"{contact.ContactUserID}-{user.UserID}";
-                    string sql = @$"SELECT * FROM 'Messages-{outputEvalContactAdded}';";// WHERE MessagesContactReceiverID = @messagesContactReceiverID;
-                    dbCmd.CommandText = sql;
+                    string dbQuery = @$"SELECT * FROM 'Messages-{outputEvalContactAdded}';";// WHERE MessagesContactReceiverID = @messagesContactReceiverID;
+                    dbCmd.CommandText = dbQuery;
                     //dbCmd.Parameters.AddWithValue("messagesContactReceiverID", contact.ContactUserID);
                     using (SQLiteDataReader queryRes = dbCmd.ExecuteReader())
                     {
@@ -729,8 +538,8 @@ namespace LibChatServer
                 using (SQLiteCommand dbCmd = new SQLiteCommand(dbConn))
                 {
                     string outputEvalContactAdded = contact.ContactsAdded ? $"{user.UserID}-{contact.ContactUserID}" : $"{contact.ContactUserID}-{user.UserID}";
-                    string sql = @$"SELECT * FROM 'Messages-{outputEvalContactAdded}';";// WHERE MessagesDateTimeSend >= @messageDateTimeSend;
-                    dbCmd.CommandText = sql;
+                    string dbQuery = @$"SELECT * FROM 'Messages-{outputEvalContactAdded}';";// WHERE MessagesDateTimeSend >= @messageDateTimeSend;
+                    dbCmd.CommandText = dbQuery;
                     dbCmd.Parameters.AddWithValue("messageDateTimeSend", newMsgFromDateTime.ToString());
                     using (SQLiteDataReader queryRes = dbCmd.ExecuteReader())
                     {
@@ -782,8 +591,8 @@ namespace LibChatServer
                 using (SQLiteCommand dbCmd = new SQLiteCommand(dbConn))
                 {
                     string outputEvalContactAdded = contact.ContactsAdded ? $"{user.UserID}-{contact.ContactUserID}" : $"{contact.ContactUserID}-{user.UserID}";
-                    string sql = @$"INSERT INTO 'Messages-{outputEvalContactAdded}' (MessagesUserSenderID, MessagesContactReceiverID, MessagesDateTimeSend, MessagesText) VALUES (@messageUserSenderID, @messageContactReceiverID, @messageDateTimeSend, @messageText);";
-                    dbCmd.CommandText = sql;
+                    string dbQuery = @$"INSERT INTO 'Messages-{outputEvalContactAdded}' (MessagesUserSenderID, MessagesContactReceiverID, MessagesDateTimeSend, MessagesText) VALUES (@messageUserSenderID, @messageContactReceiverID, @messageDateTimeSend, @messageText);";
+                    dbCmd.CommandText = dbQuery;
                     dbCmd.Parameters.AddWithValue("messageUserSenderID", user.UserID);
                     dbCmd.Parameters.AddWithValue("messageContactReceiverID", message.MessageContactReceiverID);
                     dbCmd.Parameters.AddWithValue("messageDateTimeSend", message.MessageDateTimeSend.ToString("dd/MM/yyyy HH:mm:ss"));
@@ -801,4 +610,3 @@ namespace LibChatServer
         }
     }
 }
-#pragma warning restore CS0162 // È stato rilevato codice non raggiungibile

@@ -51,6 +51,30 @@ namespace ChatClient_Scardi
             panelViewMsg.Controls.Clear();
         }
 
+        private void DeactivateToolStripLogin()
+        {
+            nuovaConnessioneToolStripMenuItem.Enabled = true;
+            connettiToolStripMenuItem.Enabled = true;
+            disconnettiToolStripMenuItem.Enabled = false;
+
+            utenteToolStripMenuItem.Enabled = false;
+            accediToolStripMenuItem.Enabled = false;
+            registratiToolStripMenuItem.Enabled = false;
+            esciToolStripMenuItem.Enabled = false;
+        }
+
+        private void ActivateToolStripLogin()
+        {
+            nuovaConnessioneToolStripMenuItem.Enabled = false;
+            connettiToolStripMenuItem.Enabled = false;
+            disconnettiToolStripMenuItem.Enabled = true;
+
+            utenteToolStripMenuItem.Enabled = true;
+            accediToolStripMenuItem.Enabled = true;
+            registratiToolStripMenuItem.Enabled = true;
+            //esciToolStripMenuItem.Enabled = true;
+        }
+
         private void DeactivateContactsControls()
         {
 
@@ -139,21 +163,18 @@ namespace ChatClient_Scardi
                 {
                     MWindow m = new MWindow(ManagementWindow.Type.Connection);
                     m.ShowDialog();
+                    
+                    if (m.GetResult() == null)
+                        continue;
+
                     ServerIP = IPAddress.Parse(m.GetResult());
+                    nuovaConnessioneToolStripMenuItem.Enabled = false;
+                    connettiToolStripMenuItem.Enabled = false;
+                    disconnettiToolStripMenuItem.Enabled = true;
+                    boxChat.Visible = false;
 
-                    if (Protocols.RemoveTerminator(Connection.SendReceiveFromServer(ServerIP, $"{TestConn.ProtocolString}{ServerIP}{EOF.ProtocolString}")) == ServerIP.ToString())
-                    {
-                        ServerConnection = true;
-                        nuovaConnessioneToolStripMenuItem.Enabled = false;
-                        connettiToolStripMenuItem.Enabled = false;
-                        disconnettiToolStripMenuItem.Enabled = true;
-
-                        boxChat.Visible = false;
-
-                        MessageBox.Show("Verifica Connessione al server tramite protocollo di test connessione effettuato con successo, risposta ottenuta", "Verifica IP Server Avvenuta", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    else
-                        MessageBox.Show("Verifica Connessione al server tramite protocollo di test connessione fallito, risposta non ottenuta", "Errore Verifica IP Server", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    ServerConnection = true;
+                    MessageBox.Show("Verifica Connessione al server tramite protocollo di test connessione effettuato con successo, risposta ottenuta", "Verifica IP Server Avvenuta", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
             catch (Exception)
@@ -176,21 +197,26 @@ namespace ChatClient_Scardi
         {
             try
             {
+
                 MWindow m = new MWindow(ManagementWindow.Type.Connection);
                 m.ShowDialog();
-                ServerIP = IPAddress.Parse(m.GetResult());
 
-                if (Protocols.RemoveTerminator(Connection.SendReceiveFromServer(ServerIP, $"{TestConn.ProtocolString}{ServerIP}{EOF.ProtocolString}")) == ServerIP.ToString())
+                if (m.GetResult() == null)
                 {
-                    ServerConnection = true;
-                    nuovaConnessioneToolStripMenuItem.Enabled = false;
-                    connettiToolStripMenuItem.Enabled = false;
-                    disconnettiToolStripMenuItem.Enabled = true;
-
-                    MessageBox.Show("Verifica Connessione al server tramite protocollo di test connessione effettuato con successo, risposta ottenuta", "Verifica IP Server Avvenuta", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                else
+                    DeactivateToolStripLogin();
                     MessageBox.Show("Verifica Connessione al server tramite protocollo di test connessione fallito, risposta non ottenuta", "Errore Verifica IP Server", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                ServerIP = IPAddress.Parse(m.GetResult());
+                nuovaConnessioneToolStripMenuItem.Enabled = false;
+                connettiToolStripMenuItem.Enabled = false;
+                disconnettiToolStripMenuItem.Enabled = true;
+                boxChat.Visible = false;
+
+                ServerConnection = true;
+                ActivateToolStripLogin();
+                MessageBox.Show("Verifica Connessione al server tramite protocollo di test connessione effettuato con successo, risposta ottenuta", "Verifica IP Server Avvenuta", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception)
             {
@@ -202,56 +228,44 @@ namespace ChatClient_Scardi
         {
             try
             {
-                Ping testServerIP = new Ping();
-                PingReply testStatus = testServerIP.Send(ServerIP);
-                if (testStatus.Status == IPStatus.Success)
-                {
-                    if (Protocols.RemoveTerminator(Connection.SendReceiveFromServer(ServerIP, $"{TestConn.ProtocolString}{ServerIP}{EOF.ProtocolString}")) == ServerIP.ToString())
-                    {
-                        ServerConnection = true;
-                        nuovaConnessioneToolStripMenuItem.Enabled = false;
-                        connettiToolStripMenuItem.Enabled = false;
-                        disconnettiToolStripMenuItem.Enabled = true;
+                IPStatus statusTestServer = Connection.VerifyConnectionToServer(ServerIP);
 
-                        MessageBox.Show("Riconnessione al server avvenuta con Successo", "Riconnessione Avvenuta", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    else
-                        MessageBox.Show("Test Connessione al server fallito, Impossibile Raggiungere il Server", "Errore Riconnessione", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (statusTestServer == IPStatus.Success)
+                {
+                    ServerConnection = true;
+                    ActivateToolStripLogin();
+                    MessageBox.Show("Riconnessione al server avvenuta con Successo", "Riconnessione Avvenuta", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
-                else if (testStatus.Status == IPStatus.TimedOut)
+                else if (statusTestServer == IPStatus.DestinationHostUnreachable || statusTestServer == IPStatus.DestinationNetworkUnreachable || statusTestServer == IPStatus.TimedOut)
                 {
-                    testStatus = testServerIP.Send(ServerIP);
-                    if (testStatus.Status == IPStatus.Success)
-                    {
-                        if (Protocols.RemoveTerminator(Connection.SendReceiveFromServer(ServerIP, $"{TestConn.ProtocolString}{ServerIP}{EOF.ProtocolString}")) == ServerIP.ToString())
-                        {
-                            ServerConnection = true;
-                            nuovaConnessioneToolStripMenuItem.Enabled = false;
-                            connettiToolStripMenuItem.Enabled = false;
-                            disconnettiToolStripMenuItem.Enabled = true;
-
-                            MessageBox.Show("Riconnessione al server avvenuta con Successo", "Riconnessione Avvenuta", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        }
-                        else
-                            MessageBox.Show("Test Connessione al server fallito, Impossibile Raggiungere il Server", "Errore Riconnessione", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    else
-                    {
-                        MessageBox.Show("Errore Riconnessione al server, provare con la funzione: Nuova Connessione...", "Errore Riconnessione", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+                    ServerConnection = false;
+                    DeactivateToolStripLogin();
+                    MessageBox.Show("Test Connessione al server fallito, Impossibile Raggiungere il Server", "Errore Riconnessione", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else if (statusTestServer == IPStatus.Unknown)
+                {
+                    ServerConnection = false;
+                    DeactivateToolStripLogin();
+                    MessageBox.Show("Il Server all IP fornito non supporta il Client Chat", "Server Errato", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 else
                 {
                     ServerConnection = false;
-                    MessageBox.Show("Errore Riconnessione al server, provare con la funzione: Nuova Connessione...", "Errore Riconnessione", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    nuovaConnessioneToolStripMenuItem.Enabled = true;
-                    connettiToolStripMenuItem.Enabled = false;
-                    disconnettiToolStripMenuItem.Enabled = false;
+                    DeactivateToolStripLogin();
+                    MessageBox.Show("Errore nell inserimento dell indirizzo IP del server", "Errore IP", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-            catch (Exception)
+            catch (NullReferenceException)
             {
-                MessageBox.Show("Test Connessione al server fallito, Impossibile Raggiungere il Server con l'IP Fornito", "Errore Riconnessione", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ServerConnection = false;
+                DeactivateToolStripLogin();
+                MessageBox.Show("Impossibile raggiungere il Server", "Errore Connessione al Server", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Exception ex)
+            {
+                ServerConnection = false;
+                DeactivateToolStripLogin();
+                MessageBox.Show(ex.Message, "Errore", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -263,6 +277,8 @@ namespace ChatClient_Scardi
                     esciToolStripMenuItem_Click(sender, e);
                 ServerConnection = false;
                 DeactivateContactsControls();
+
+                DeactivateToolStripLogin();
 
                 MessageBox.Show("Disconnessione dal server avvenuta con successo, ogni utente loggato è stato disconnesso", "Disconnessione Avvenuta", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
@@ -320,6 +336,10 @@ namespace ChatClient_Scardi
                             MessageBox.Show("Nel server si è verificato un errore sconosciuto.", "Errore Sconosciuto", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
 
+                }
+                catch (NullReferenceException)
+                {
+                    MessageBox.Show("Impossibile Contattare il Server", "Errore Comunicazione", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 catch (Exception ex)
                 {
@@ -780,10 +800,9 @@ namespace ChatClient_Scardi
 
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                MessageBox.Show(ex.Message, "Errore Invio Messaggio", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

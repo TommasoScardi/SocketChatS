@@ -32,7 +32,6 @@ C:\Users\Tommaso\Documents\GitHub\SocketChatS\ChatServer_Scardi\LibChatServer\bi
 C:\Users\Tommaso\Documents\GitHub\SocketChatS\ChatServer_Scardi\LibChatServer\bin\Debug\net5.0\LibChatServer.runtimeconfig.json
 C:\Users\Tommaso\Documents\GitHub\SocketChatS\ChatServer_Scardi\LibChatServer\bin\Debug\net5.0\LibChatServer.runtimeconfig.dev.json
 C:\Users\Tommaso\Documents\GitHub\SocketChatS\ChatServer_Scardi\LibChatServer\bin\Debug\net5.0\LibChatServer.dll
-C:\Users\Tommaso\Documents\GitHub\SocketChatS\ChatServer_Scardi\LibChatServer\bin\Debug\net5.0\ref\LibChatServer.dll
 C:\Users\Tommaso\Documents\GitHub\SocketChatS\ChatServer_Scardi\LibChatServer\bin\Debug\net5.0\LibChatServer.pdb
 C:\Users\Tommaso\Documents\GitHub\SocketChatS\ChatServer_Scardi\LibChatServer\obj\Debug\net5.0\LibChatServer.csproj.AssemblyReference.cache
 C:\Users\Tommaso\Documents\GitHub\SocketChatS\ChatServer_Scardi\LibChatServer\obj\Debug\net5.0\LibChatServer.GeneratedMSBuildEditorConfig.editorconfig
@@ -58,3 +57,4 @@ C:\Users\Utente\Documents\GitHub\SocketChatS\ChatServer_Scardi\LibChatServer\obj
 C:\Users\Utente\Documents\GitHub\SocketChatS\ChatServer_Scardi\LibChatServer\obj\Debug\net5.0\ref\LibChatServer.dll
 C:\Users\Utente\Documents\GitHub\SocketChatS\ChatServer_Scardi\LibChatServer\obj\Debug\net5.0\LibChatServer.pdb
 C:\Users\Utente\Documents\GitHub\SocketChatS\ChatServer_Scardi\LibChatServer\obj\Debug\net5.0\LibChatServer.genruntimeconfig.cache
+C:\Users\Tommaso\Documents\GitHub\SocketChatS\ChatServer_Scardi\LibChatServer\obj\Debug\net5.0\refint\LibChatServer.dll

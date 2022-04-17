@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LibChatClient.Connections;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -194,20 +195,24 @@ namespace ManagementWindow
                         try
                         {
                             IPAddress serverIP = IPAddress.Parse(txtInput["inputConnIPAddress"].Text.Trim());
-                            Ping testIP = new Ping();
-                            PingReply resTestIP = testIP.Send(serverIP);
-                            //output = resTestIP.Status == IPStatus.Success ? serverIP.ToString() : string.Empty;
+                            IPStatus statusTestServer = Connection.VerifyConnectionToServer(serverIP);
 
-                            if (resTestIP.Status == IPStatus.Success)
+                            if (statusTestServer == IPStatus.Success)
                             {
                                 output = serverIP.ToString();
                                 MessageBox.Show("Connessione al server avvenuta con successo!", "Connessione Avvenuta", MessageBoxButtons.OK, MessageBoxIcon.Information);
                                 this.Close();
                             }
-                            else if (resTestIP.Status == IPStatus.DestinationHostUnreachable || resTestIP.Status == IPStatus.DestinationNetworkUnreachable || resTestIP.Status == IPStatus.TimedOut)
+                            else if (statusTestServer == IPStatus.DestinationHostUnreachable || statusTestServer == IPStatus.DestinationNetworkUnreachable || statusTestServer == IPStatus.TimedOut)
                                 MessageBox.Show("Impossibile raggiungere il Server", "Errore IP", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            else if (statusTestServer == IPStatus.Unknown)
+                                MessageBox.Show("Il Server all IP fornito non supporta il Client Chat", "Server Errato", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             else
                                 MessageBox.Show("Errore nell inserimento dell indirizzo IP del server", "Errore IP", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                        catch (NullReferenceException)
+                        {
+                            MessageBox.Show("Impossibile raggiungere il Server", "Errore Connessione al Server", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                         catch (Exception ex)
                         {
